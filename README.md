@@ -16,7 +16,7 @@ Run the standalone .exe from [Releases](https://github.com/orbicube/sorcle/relea
 * To somewhat alleviate this in OBS, use the provided `backboard.png` (or the -992 variant for a little border) as a source behind the program.
 
 ## Configuration
-settings.toml is configurable, and you can swap out the sound and graphic files as needed. Sound files are statically referenced so must match their filename. 
+settings.toml is configurable, and you can swap out the sound and graphic files as needed.
 ```
 [spreadsheet]
 id: String # found between /d/ and /edit in url of a Google Sheets spreadsheet
@@ -32,14 +32,22 @@ suppress_win: Boolean # Suppress winner notification if handling visuals elsewhe
 
 [pointer] # Image that points to the result of the wheel
 file: String # Can be animated GIF or any other arbitrary image type
-scale: Float
+scale: Float # 1.0 = 100%
 x_pos: Integer # Position on screen, adjustable for different images
 y_pos: Integer
 
 [center] # Image placed in the center of the wheel
 file: String # Can be animated GIF or any other arbitrary image type
-scale: Float 
+scale: Float # 1.0 = 100%
 rotate: Boolean # Rotate with the wheel
+
+[tick] # Sound played when pointer 'hits' wedge
+file: String # WAV only I think
+volume: Float # 1.0 = 100%
+
+[finished] # Sound played when wheel finishes spinning
+file: String # WAV only I think
+volume: Float # 1.0 = 100%
 
 [window]
 nearest_neighbour: Boolean # Whether to use nearest neighbour scaling for pixel art sprites
