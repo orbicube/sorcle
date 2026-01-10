@@ -1,0 +1,58 @@
+[spreadsheet]
+# found between /d/ and /edit in url of a Google Sheets spreadsheet
+"id" = "1Kzyx6KkDOTP80XItdwAQEIoBxGXnka8PxLMJQQEDKC4"
+# identifies the sheet in the document, often 0 for single sheet documents
+"gid"= "1890301284"
+# Row number to start from, indexing from 1
+"row" = 3
+# Column to scan, indexing from 1 (C = 3)
+"title_column" = 5
+
+[wheel]
+font = "Arial"
+colors = [ # RGB arrays of colors to use for wedges; font colour will change to match
+	[216,68,46],
+	[113,222,64],
+	[143,67,218],
+	[217,215,50],
+	[197,81,183],
+	[156,195,75],
+	[113,112,199],
+	[215,140,44],
+	[79,208,169],
+	[195,82,139],
+	[102,183,99],
+	[200,73,95],
+	[172,157,76],
+	[184,95,61]
+]
+# Remove duplicate entries from the results; if false then entries will be combined
+remove_dupes = false
+# Suppress winner notification if handling visuals elsewhere
+suppress_win = false
+# Whether to print the result to file or not, useful for further handling in OBS
+to_file = false
+
+
+[pointer] # Image that points to the result of the wheel
+# Can be animated GIF or any other arbitrary image type
+"file" = "pointer.png"
+"scale" = 1.0
+# Position on screen, adjustable for different images
+"x_pos" = 1015
+"y_pos" = 500
+
+[center] # Image placed in the center of the wheel
+# Can be animated GIF or any other arbitrary image type
+"file" = "center.gif"
+"scale" = 6.0
+ # Rotate with the wheel
+"rotate" = true
+
+[window]
+# Whether to use nearest neighbour scaling for pixel art sprites
+nearest_neighbour = true
+
+
+
+
