@@ -30,8 +30,6 @@ colors = [ # RGB arrays of colors to use for wedges; font colour will change to 
 remove_dupes = false
 # Suppress winner notification if handling visuals elsewhere
 suppress_win = false
-# Whether to print the result to file or not, useful for further handling in OBS
-to_file = false
 
 
 [pointer] # Image that points to the result of the wheel

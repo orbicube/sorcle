@@ -262,7 +262,7 @@ class Sorcle(pyglet.window.Window):
 
                 # Silently print to file
                 with open(path.join(w_dir, "winner.txt"), 'w') as f:
-                    f.write(self.wheel.selected_name)
+                    f.write(self.wheel.selected["name"])
                 
                 if not settings["wheel"]["suppress_win"]:
                     finished = pyglet.media.load(
