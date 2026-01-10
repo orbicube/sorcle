@@ -176,7 +176,7 @@ class Sorcle(pyglet.window.Window):
     initial_velocity = 25
 
     def __init__(self, config):
-        super().__init__(width = 1200, height = 1000, caption = "Sorcle",
+        super().__init__(width = 1200, height = 1000, caption = "sorcle",
             config = config, style='transparent')
 
         icon = pyglet.image.load(path.join(w_dir, settings["center"]["file"]))
