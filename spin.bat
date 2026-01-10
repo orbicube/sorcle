@@ -1,1 +1,1 @@
-copy NUL spin
+copy NUL %~dp0\spin

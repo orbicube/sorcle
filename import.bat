@@ -1,1 +1,1 @@
-copy NUL import
+copy NUL %~dp0\import
