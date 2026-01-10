@@ -18,6 +18,7 @@ Run the standalone .exe from [Releases](https://github.com/orbicube/sorcle/relea
 
 ## Configuration
 settings.toml is configurable, and you can swap out the sound and graphic files as needed.
+### Reference
 ```
 [spreadsheet]
 api_key: String # Create one at https://console.cloud.google.com/apis/api/sheets.googleapis.com/
