@@ -32,21 +32,22 @@ suppress_win: Boolean # Suppress winner notification if handling visuals elsewhe
 
 [pointer] # Image that points to the result of the wheel
 file: String # Can be animated GIF or any other arbitrary image type
-scale: Float
+scale: Float # 1.0 = 100%
 x_pos: Integer # Position on screen, adjustable for different images
 y_pos: Integer
 
 [center] # Image placed in the center of the wheel
 file: String # Can be animated GIF or any other arbitrary image type
-scale: Float 
+scale: Float # 1.0 = 100%
 rotate: Boolean # Rotate with the wheel
 
 [tick] # Sound played when pointer 'hits' wedge
 file: String # WAV only I think
-volume: Float
+volume: Float # 1.0 = 100%
 
 [finished] # Sound played when wheel finishes spinning
 file: String # WAV only I think
+volume: Float # 1.0 = 100%
 
 [window]
 nearest_neighbour: Boolean # Whether to use nearest neighbour scaling for pixel art sprites
