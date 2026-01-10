@@ -1,4 +1,4 @@
-# Sorcle
+# sorcle
 pyglet program to draw a spinning wheel, grabbing a list of names from a public Google Sheet file. Primarily designed for usage as an OBS Game Source.
 ## Installation
 Add a [Google API key with Google Sheets enabled](https://console.cloud.google.com/apis/api/sheets.googleapis.com/) to `settings.toml`.
