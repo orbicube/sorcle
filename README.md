@@ -13,8 +13,7 @@ Run the standalone .exe from [Releases](https://github.com/orbicube/sorcle/relea
 * To spin the wheel, create a file called "spin" in the directory.
 * To re-import your list, create a file called "import" in the directory.
 * For Windows users there is a .bat file to trigger this with a Stream Deck or similar application.
-* Currently text is partially transparent and has an aliased look.
-* To somewhat alleviate this in OBS, use the provided `backboard.png` (or the -992 variant for a little border) as a source behind the program.
+* Currently text is partially transparent and has an aliased look.  To somewhat alleviate this in OBS, use the provided `backboard.png` (or the -992 variant for a little border) as a source behind the program.
 
 ## Configuration
 settings.toml is configurable, and you can swap out the sound and graphic files as needed.
