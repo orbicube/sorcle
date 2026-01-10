@@ -93,34 +93,29 @@ class Wheel:
     def import_spreadsheet(self):
         self.wedges = []
 
-        # Downlaod spreadsheet from Google; id=document, gid=specific sheet
-        # gid on a single sheet document will often be 0
+        # Downlaod spreadsheet from Google
+        s_config = settings["spreadsheet"]
         params = {
-            "gid": settings["spreadsheet"]["gid"],
-            "format": "tsv"
+            "key": s_config["api_key"],
+            "ranges": f"{s_config['sheet']}!{s_config['column']}{s_config['row']}:{s_config['column']}"
         }
-        r = requests.get(("https://docs.google.com/spreadsheets/d/"
-            f"{settings['spreadsheet']['id']}/export"), params=params)
-        sheet = csv.reader(StringIO(r.text, newline="\n"), delimiter="\t")
-        
-        # Iterate to starting row
-        for i in range(settings["spreadsheet"]["row"]-1):
-            next(sheet)
+        r = requests.get(("https://sheets.googleapis.com/v4/spreadsheets/"
+            f"{s_config['id']}/values:batchGet"), params=params)
+        rows = r.json()["valueRanges"][0]["values"]
 
-        # Because csv.reader gets consumed when used, need temp list for count
+        # Grab all values, filter out empty and handle dupe logic
         temp_wedges = []
-        for row in sheet:
-            game_name = row[settings["spreadsheet"]["title_column"]-1]
+        for row in rows:
             # Filter out dupe games if setting is true
             if settings["wheel"]["remove_dupes"]:
-                if game_name and (game_name not in temp_wedges):
-                    temp_wedges.append(game_name)
+                if row and (row[0] not in temp_wedges):
+                    temp_wedges.append(row[0])
             # Otherwise, put the dupes next to each other to combine later
             else:
-                if game_name and (game_name in temp_wedges):
-                    temp_wedges.insert(temp_wedges.index(game_name), game_name)
-                elif game_name:
-                    temp_wedges.append(game_name)
+                if row and (row[0] in temp_wedges):
+                    temp_wedges.insert(temp_wedges.index(row[0]), row[0])
+                elif row:
+                    temp_wedges.append(row[0])
 
         # Calculate angle for wedges
         wedge_num = len(temp_wedges)

@@ -1,12 +1,13 @@
 [spreadsheet]
+# Insert Google API key https://console.cloud.google.com/apis/api/sheets.googleapis.com/
+"api_key" = ""
 # found between /d/ and /edit in url of a Google Sheets spreadsheet
-"id" = "1Kzyx6KkDOTP80XItdwAQEIoBxGXnka8PxLMJQQEDKC4"
-# identifies the sheet in the document, often 0 for single sheet documents
-"gid"= "1890301284"
+"id" = "14f2IPkBaMliBQk7R9JWyQUCPs6u47kmug4BUyelVN7U"
+"sheet" = "Queue"
 # Row number to start from, indexing from 1
 "row" = 3
-# Column to scan, indexing from 1 (C = 3)
-"title_column" = 5
+# Column to scan, in letter notation
+"column" = "C"
 
 [wheel]
 font = "Arial"
