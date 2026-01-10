@@ -20,10 +20,11 @@ Run the standalone .exe from [Releases](https://github.com/orbicube/sorcle/relea
 settings.toml is configurable, and you can swap out the sound and graphic files as needed.
 ```
 [spreadsheet]
+api_key: String # Create one at https://console.cloud.google.com/apis/api/sheets.googleapis.com/
 id: String # found between /d/ and /edit in url of a Google Sheets spreadsheet
-gid: String # identifies the current sheet in the document URL, often 0 for single sheet documents
+sheet: String # Sheet name, Sheet1 if you haven't renamed one
 row: Integer # Row number to start from, indexing from 1
-title_column: Integer # Column to scan, indexing from 1 e.g. C = 3
+column: # Column to scan, in letter noation
 
 [wheel]
 font: String # Font installed in the system
