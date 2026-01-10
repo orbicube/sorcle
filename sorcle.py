@@ -214,7 +214,8 @@ class Sorcle(pyglet.window.Window):
         self.pointer_sprite.update(scale=settings["pointer"]["scale"])
 
         self.sound = pyglet.media.load(
-            path.join(w_dir, 'ping.wav'), streaming=False)
+            path.join(w_dir, settings["tick"]["file"]), streaming=False)
+        self.sound.volume = settings["tick"]["volume"]
         self.player = None
 
         self.winner_group = pyglet.graphics.Group(order=5)
@@ -266,7 +267,9 @@ class Sorcle(pyglet.window.Window):
                 
                 if not settings["wheel"]["suppress_win"]:
                     finished = pyglet.media.load(
-                        path.join(w_dir, 'finished.wav')).play()
+                        path.join(w_dir, settings["finished"]["file"]))
+                    finished.volume = settings["finished"]["volume"]
+                    finished.play()
 
                     # Print winner name
                     self.winner = pyglet.text.Label(self.wheel.selected["name"],

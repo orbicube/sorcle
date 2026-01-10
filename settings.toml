@@ -47,10 +47,15 @@ suppress_win = false
  # Rotate with the wheel
 "rotate" = true
 
+[tick] # Sound played when pointer 'hits' wedge
+"file" = "tick.wav" # WAV only
+"volume" = 1.0
+
+[finished] # Sound played when wheel finishes spinning
+"file" = "finished.wav" # WAV only
+"volume" = 1.0
+
 [window]
 # Whether to use nearest neighbour scaling for pixel art sprites
 nearest_neighbour = true
-
-
-
 
