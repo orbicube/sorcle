@@ -179,6 +179,9 @@ class Sorcle(pyglet.window.Window):
         super().__init__(width = 1200, height = 1000, caption = "Sorcle",
             config = config, style='transparent')
 
+        icon = pyglet.image.load(path.join(w_dir, settings["center"]["file"]))
+        self.set_icon(icon, icon)
+
         # For crisp pixel scaling
         if settings["window"]["nearest_neighbour"]:
             pyglet.image.Texture.default_mag_filter = pyglet.gl.GL_NEAREST
@@ -221,7 +224,6 @@ class Sorcle(pyglet.window.Window):
 
 
     def on_draw(self):
-        pyglet.gl.glClearColor(0.0, 0.0, 0.0, 0.0)
         self.clear()
 
         if self.wheel.spinning:
