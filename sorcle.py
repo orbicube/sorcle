@@ -16,6 +16,9 @@ pyglet.resource.path = [str(w_dir)]
 import tomllib
 with open(path.join(w_dir, "settings.toml"), "rb") as f:
     settings = tomllib.load(f)
+    
+    if not settings["spreadsheet"]["api_key"]:
+        raise ValueError("Couldn't find an API key in settings.toml")
 
 def get_text_color(color):
     color_intensity = (color[0]*.299 + color[1]*.587 + color[2]*.114)
