@@ -7,7 +7,7 @@ pyglet program to draw a spinning wheel, grabbing a list of names from a public 
   python wheel.py
 ```
 ### Windows
-Or run the standalone .exe.
+Run the standalone .exe from [Releases](https://github.com/orbicube/sorcle/releases/latest).
 ## Usage
 * To spin the wheel, create a file called "spin" in the directory.
 * To re-import your list, create a file called "import" in the directory.
