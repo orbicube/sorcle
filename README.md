@@ -1,14 +1,11 @@
 # Sorcle
 pyglet program to draw a spinning wheel, grabbing a list of names from a public Google Sheet file. Primarily designed for usage as an OBS Game Source.
-## Requirements
-* Python 3.11
-* pyglet
-* requests
 ## Installation
 ```
-  python -m pip install -r requirements.txt
+  python3.11 -m pip install -r requirements.txt
   python wheel.py
 ```
+Or run the standalone .exe.
 ## Usage
 * To spin the wheel, create a file called "spin" in the directory.
 * To re-import your list, create a file called "import" in the directory.
