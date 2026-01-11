@@ -1,5 +1,8 @@
-# Sorcle
-pyglet program to draw a spinning wheel, grabbing a list of names from a public Google Sheet file. Primarily designed for usage as an OBS Game Source.
+# sorcle
+pyglet program to draw a spinning wheel, grabbing a list of names from a public Google Sheet file. Primarily designed for usage as an OBS source.
+
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/f6245651-c24d-49a8-9766-cc480d2c0349" />
+
 ## Installation
 Add a [Google API key with Google Sheets enabled](https://console.cloud.google.com/apis/api/sheets.googleapis.com/) to `settings.toml`.
 ### Python (3.11+)
@@ -13,11 +16,10 @@ Run the standalone .exe from [Releases](https://github.com/orbicube/sorcle/relea
 * To spin the wheel, create a file called "spin" in the directory.
 * To re-import your list, create a file called "import" in the directory.
 * For Windows users there is a .bat file to trigger this with a Stream Deck or similar application.
-* Currently text is partially transparent and has an aliased look.
-* To somewhat alleviate this in OBS, use the provided `backboard.png` (or the -992 variant for a little border) as a source behind the program.
+* Currently text is partially transparent and has an aliased look.  To somewhat alleviate this in OBS, use the provided `backboard.png` (or the -992 variant for a little border) as a source behind the program.
 
 ## Configuration
-settings.toml is configurable, and you can swap out the sound and graphic files as needed.
+settings.toml is configurable, and you can swap out the sound and graphic files as needed. Changed settings will not be reflected on an import, you must restart the program for them to be reflected.
 ### Reference
 ```
 [spreadsheet]
@@ -55,4 +57,4 @@ volume: Float # 1.0 = 100%
 [window]
 nearest_neighbour: Boolean # Whether to use nearest neighbour scaling for pixel art sprites
 ```
-Changed settings will not be reflected on an import, you must restart the program for them to be reflected.
+
