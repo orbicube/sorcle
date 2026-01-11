@@ -1,10 +1,8 @@
 import pyglet
 import requests
-import csv
 import pathlib
 import sys, os
 from os import path
-from io import StringIO
 from random import choice, randint
 
 if getattr(sys, 'frozen', False):
@@ -60,17 +58,17 @@ class Wedge(pyglet.shapes.Sector):
         return (self.start_angle + self.angle) % 360 < self.start_angle
 
 class Wheel:
-
-    wedges = []
-    spinning = False
-    finished = False
-    idle = True
-    selected = {"name": "", "color": (0,0,0,0)}
     
-    def __init__(self, wedge_group, text_group, sprite_group, batch):
+    def __init__(self, sprite_group, batch):
+        self.wedges = []
+        self.spinning = False
+        self.finished = False
+        self.idle = True
+        self.selected = {"name": "", "color": (0,0,0,0)}
+
         self.batch = batch
-        self.wedge_group = wedge_group
-        self.text_group = text_group
+        self.wedge_group = pyglet.graphics.Group(order=0)
+        self.text_group = pyglet.graphics.Group(order=0)
 
         self.colors = []
         for color in settings["wheel"]["colors"]:
@@ -171,14 +169,12 @@ class Wheel:
 
 class Sorcle(pyglet.window.Window):
 
-    initial_velocity = 25
-
     def __init__(self, config):
         super().__init__(width = 1200, height = 1000, caption = "sorcle",
             config = config, style='transparent')
 
         icon = pyglet.image.load(path.join(w_dir, settings["center"]["file"]))
-        self.set_icon(icon, icon)
+        self.set_icon(icon)
 
         # For crisp pixel scaling
         if settings["window"]["nearest_neighbour"]:
@@ -187,12 +183,11 @@ class Sorcle(pyglet.window.Window):
 
         #self.fps_display = pyglet.window.FPSDisplay(self)
         self.batch = pyglet.graphics.Batch()
-        self.wedge_group = pyglet.graphics.Group(order=-1)
-        self.text_group = pyglet.graphics.Group(order=2)
         self.sprite_group = pyglet.graphics.Group(order=3)
 
-        self.wheel = Wheel(self.wedge_group, self.text_group,
-            self.sprite_group, self.batch)
+        self.initial_velocity = 25
+
+        self.wheel = Wheel(self.sprite_group, self.batch)
 
         # Position pointer, change anchor keeping centered regardless of size
         pyglet.resource.path = [w_dir]
@@ -296,19 +291,15 @@ class Sorcle(pyglet.window.Window):
                 self.wheel.rotate(0.02)
 
             if pathlib.Path(path.join(w_dir, "import")).is_file():
-
                 # Clear winner on re-import
                 if self.winner:
                     self.winner = None
                     self.winner_bg = None
 
-                self.wheel = None
-                self.wheel = Wheel(self.wedge_group, self.text_group,
-                    self.sprite_group, self.batch)
+                self.wheel = Wheel(self.sprite_group, self.batch)
                 os.remove(path.join(w_dir, "import"))
 
             elif pathlib.Path(path.join(w_dir, "spin")).is_file():
-
                 # Clear winner on re-spin
                 if self.winner:
                     self.winner = None
