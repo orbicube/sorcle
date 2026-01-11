@@ -231,25 +231,11 @@ class Sorcle(pyglet.window.Window):
                 elif self.player.time > 0.033 or not self.player.playing:
                     self.player = self.sound.play()
 
-            # Approx velocity deceleration; this sucks but it works
-            if self.velocity > 50:
-                self.velocity -= 1.0
-            if self.velocity > 25:
-                self.velocity -= 0.5
-            elif self.velocity > 10:
-                self.velocity -= 0.1
-            elif self.velocity > 5:
-                self.velocity -= 0.05
-            elif self.velocity > 3:
-                self.velocity -= 0.02
-            elif self.velocity > 1:
-                self.velocity -= 0.01
-            elif self.velocity > 0.5:
-                self.velocity -= 0.005
-            elif self.velocity > 0.05:
-                self.velocity -= 0.0005
-            elif 0 < self.velocity < 0.05:
-                self.velocity -= 0.0002
+            if self.velocity < 0.005:
+                self.velocity -= 0.0003
+            else:
+                self.velocity -= self.velocity * (
+                    (settings["wheel"]["decel_rate"]) / 100)
 
             if self.velocity < 0:
                 self.wheel.spinning = False

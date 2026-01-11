@@ -31,7 +31,8 @@ colors = [ # RGB arrays of colors to use for wedges; font colour will change to 
 remove_dupes = false
 # Suppress winner notification if handling visuals elsewhere
 suppress_win = false
-
+# How fast the wheel decelerates. 1.0 = -1% of current speed per tick
+decel_rate = 1.0
 
 [pointer] # Image that points to the result of the wheel
 # Can be animated GIF or any other arbitrary image type
