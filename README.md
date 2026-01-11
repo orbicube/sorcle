@@ -19,7 +19,7 @@ Run the standalone .exe from [Releases](https://github.com/orbicube/sorcle/relea
 * Currently text is partially transparent and has an aliased look.  To somewhat alleviate this in OBS, use the provided `backboard.png` (or the -992 variant for a little border) as a source behind the program.
 
 ## Configuration
-settings.toml is configurable, and you can swap out the sound and graphic files as needed.
+settings.toml is configurable, and you can swap out the sound and graphic files as needed. Changed settings will not be reflected on an import, you must restart the program for them to be reflected.
 ### Reference
 ```
 [spreadsheet]
@@ -57,4 +57,4 @@ volume: Float # 1.0 = 100%
 [window]
 nearest_neighbour: Boolean # Whether to use nearest neighbour scaling for pixel art sprites
 ```
-Changed settings will not be reflected on an import, you must restart the program for them to be reflected.
+
