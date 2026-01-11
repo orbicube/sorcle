@@ -1,6 +1,7 @@
 # sorcle
 pyglet program to draw a spinning wheel, grabbing a list of names from a public Google Sheet file. Primarily designed for usage as an OBS source.
-![Image of a wheel with wedges containing names](https://i.imgur.com/ufwOeW3.png)
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/f6245651-c24d-49a8-9766-cc480d2c0349" />
+
 ## Installation
 Add a [Google API key with Google Sheets enabled](https://console.cloud.google.com/apis/api/sheets.googleapis.com/) to `settings.toml`.
 ### Python (3.11+)
