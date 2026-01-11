@@ -208,7 +208,6 @@ class Sorcle(pyglet.window.Window):
 
         self.sound = pyglet.media.load(
             path.join(w_dir, settings["tick"]["file"]), streaming=False)
-        self.sound.volume = settings["tick"]["volume"]
         self.player = None
 
         self.winner_group = pyglet.graphics.Group(order=5)
@@ -228,11 +227,13 @@ class Sorcle(pyglet.window.Window):
                 # Play sound if there isn't one, stopped or has been 33ms
                 if not self.player:
                     self.player = self.sound.play()
+                    self.player.volume = settings["tick"]["volume"]
                 elif self.player.time > 0.033 or not self.player.playing:
                     self.player = self.sound.play()
+                    self.player.volume = settings["tick"]["volume"]
 
             if self.velocity < 0.005:
-                self.velocity -= 0.0003
+                self.velocity -= 0.0005
             else:
                 self.velocity -= self.velocity * (
                     (settings["wheel"]["decel_rate"]) / 100)
@@ -247,8 +248,7 @@ class Sorcle(pyglet.window.Window):
                 if not settings["wheel"]["suppress_win"]:
                     finished = pyglet.media.load(
                         path.join(w_dir, settings["finished"]["file"]))
-                    finished.volume = settings["finished"]["volume"]
-                    finished.play()
+                    finished.play().volume = settings["finished"]["volume"]
 
                     # Print winner name
                     self.winner = pyglet.text.Label(self.wheel.selected["name"],
