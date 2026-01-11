@@ -34,12 +34,13 @@ font: String # Font installed in the system
 colors: Array # Array of arrays containing RGB values to use for wedges; font color will change to match
 remove_dupes: Boolean # Remove duplicate entries from the results; if false then entries will be combined
 suppress_win: Boolean # Suppress winner notification if handling visuals elsewhere
+decel_rate: Float # How fast the wheel decelerates; bigger number is faster (1.0 = -1% of current speed per tick)
 
 [pointer] # Image that points to the result of the wheel
 file: String # Can be animated GIF or any other arbitrary image type
 scale: Float # 1.0 = 100%
 x_pos: Integer # Position on screen, adjustable for different images
-y_pos: Integer
+y_pos: Integer 
 
 [center] # Image placed in the center of the wheel
 file: String # Can be animated GIF or any other arbitrary image type
