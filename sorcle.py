@@ -53,7 +53,7 @@ class Wedge(pyglet.shapes.Sector):
             text=disp_name, font_name=settings["wheel"]["font"], x=500, y=500, 
             font_size=font_size, color=get_text_color(color), width=485,
             align='right', anchor_y='center', group=text_group, batch=batch,
-            rotation=(-(start_angle+(start_angle+angle))/2-.1))
+            rotation=(-(start_angle+(start_angle+angle))/2))
 
     def rotate(self, velocity):
         self.rotation = (self.rotation + velocity) % 360
