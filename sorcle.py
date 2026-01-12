@@ -52,10 +52,10 @@ class Wedge(pyglet.shapes.Sector):
             rotation=(-(start_angle+(start_angle+angle))/2-.1))
 
     def rotate(self, velocity):
-        self.start_angle = (self.start_angle + velocity) % 360
-        self.label.rotation = (self.label.rotation - velocity) % 360
+        self.rotation = (self.rotation + velocity) % 360
+        self.label.rotation = (self.label.rotation + velocity) % 360
 
-        return (self.start_angle + self.angle) % 360 < self.start_angle
+        return (self.rotation  - self.start_angle) % 360 < self.rotation
 
 class Wheel:
     
@@ -122,7 +122,7 @@ class Wheel:
         wedge_num = len(temp_wedges)
         angle_per_wedge = 360 / wedge_num
 
-        curr_angle = -90.0
+        curr_angle = 0
         curr_wedge = 0
         prev_color = (0,0,0)
         for wedge in temp_wedges:
@@ -157,7 +157,7 @@ class Wheel:
     def rotate(self, velocity):
         if settings["center"]["rotate"]:
             self.center_sprite.rotation = (
-                self.center_sprite.rotation - velocity) % 360
+                self.center_sprite.rotation + velocity) % 360
 
         for wedge in self.wedges:
             is_selected = wedge.rotate(velocity)
