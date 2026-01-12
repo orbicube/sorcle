@@ -23,7 +23,7 @@ with open(path.join(w_dir, "settings.toml"), "rb") as f:
 def get_text_color(color):
     color_intensity = (color[0]*.299 + color[1]*.587 + color[2]*.114)
     if color_intensity > 149:
-        return (0, 0, 0)
+        return (10, 10, 10)
     else:
         return (255, 255, 255)
 
