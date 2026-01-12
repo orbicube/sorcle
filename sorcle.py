@@ -232,12 +232,12 @@ class Sorcle(pyglet.window.Window):
                 if not self.player:
                     self.player = self.sound.play()
                     self.player.volume = settings["tick"]["volume"]
-                elif self.player.time > 0.033 or not self.player.playing:
+                elif self.player.time >= 1/30 or not self.player.playing:
                     self.player = self.sound.play()
                     self.player.volume = settings["tick"]["volume"]
 
-            if self.velocity < 0.005:
-                self.velocity -= 0.0005
+            if self.velocity < 0.003:
+                self.velocity -= 0.003
             else:
                 self.velocity -= self.velocity * (
                     (settings["wheel"]["decel_rate"]) / 100)
