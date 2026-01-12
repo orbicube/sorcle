@@ -36,14 +36,15 @@ class Wedge(pyglet.shapes.Sector):
         self.name = name
 
         # Trim name if too long
-        if len(name) > 24:
-            disp_name = name[:22] + "..."
+        if len(name) > 23:
+            disp_name = name[:21] + "..."
         else:
             disp_name = name
 
-        font_size = int(angle*.66) + 12
-        if font_size > 24:
-            font_size = 24
+        # Adjust font size for smaller wedges
+        font_size = angle*.70 + (10 if angle < 3.2 else 14)
+        if font_size > 23:
+            font_size = 23
 
         self.label = pyglet.text.Label(
             text=disp_name, font_name=settings["wheel"]["font"], x=500, y=500, 
