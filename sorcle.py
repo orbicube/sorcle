@@ -5,6 +5,8 @@ import sys, os
 from os import path
 from random import choice, randint
 
+from text_fix import ArcadeTextLayoutGroup
+
 if getattr(sys, 'frozen', False):
     w_dir = pathlib.Path(sys._MEIPASS).parent
 else:
@@ -21,7 +23,7 @@ with open(path.join(w_dir, "settings.toml"), "rb") as f:
 def get_text_color(color):
     color_intensity = (color[0]*.299 + color[1]*.587 + color[2]*.114)
     if color_intensity > 149:
-        return (2, 2, 2)
+        return (0, 0, 0)
     else:
         return (255, 255, 255)
 
@@ -176,6 +178,8 @@ class Sorcle(pyglet.window.Window):
     def __init__(self, config):
         super().__init__(width = 1200, height = 1000, caption = "sorcle",
             config = config, style='transparent')
+
+        pyglet.text.layout.TextLayout.group_class = ArcadeTextLayoutGroup
 
         icon = pyglet.image.load(path.join(w_dir, settings["center"]["file"]))
         self.set_icon(icon)
