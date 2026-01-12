@@ -42,7 +42,10 @@ class Wedge(pyglet.shapes.Sector):
             disp_name = name
 
         # Adjust font size for smaller wedges
-        font_size = angle*.70 + (10 if angle < 3.2 else 14)
+        if angle < 1.6: font_floor = 6
+        elif angle < 3.2: font_floor = 10
+        else: font_floor = 14
+        font_size = angle * .70 + font_floor
         if font_size > 23:
             font_size = 23
 
