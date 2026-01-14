@@ -34,6 +34,7 @@ extra_columns: Array # Optional extra columns written to files extra1.txt, extra
 font: String # Font installed in the system
 colors: Array # Array of arrays containing RGB values to use for wedges; font color will change to match
 remove_dupes: Boolean # Remove duplicate entries from the results; if false then entries will be combined
+combine_dupes Boolean # If above is false, then this option will combine dupe wedges into a single, bigger wedge 
 suppress_win: Boolean # Suppress winner notification if handling visuals elsewhere
 decel_rate: Float # How fast the wheel decelerates; bigger number is faster (1.0 = -1% of current speed per tick)
 
