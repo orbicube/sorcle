@@ -135,9 +135,9 @@ class Wheel:
         temp_wedges = []
         for row in rows:
             if row:
-                try: sub = sub_rows[rows.index(row)][0]
+                try: sub = sub_rows[rows.index(row)][0].replace("\\n","\n")
                 except: sub = ""
-                try: extras = [x[rows.index(row)][0] for x in extra_rows]
+                try: extras = [x[rows.index(row)][0].replace("\\n","\n") for x in extra_rows]
                 except: extras = []
 
                 wedge_dict = {"name": row[0], "sub": sub, "extras": extras }
