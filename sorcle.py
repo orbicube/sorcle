@@ -4,7 +4,7 @@ import sys, os
 from os import path
 from random import choice, randint
 from glob import glob
-import httpx
+import requests
 
 from text_fix import ArcadeTextLayoutGroup
 
@@ -91,34 +91,40 @@ class Wheel:
 
         self.import_spreadsheet()
 
-    def get_sheet_rows(self, client, column):
-        s_config = settings["spreadsheet"]
-
-        params = {
-            "key": s_config["api_key"],
-            "ranges": f"{s_config['sheet']}!{column}{s_config['row']}:{column}"
-        }
-        r = client.get(("https://sheets.googleapis.com/v4/spreadsheets/"
-            f"{s_config['id']}/values:batchGet"), params=params)
-
-        return r.json()["valueRanges"][0]["values"]
-
 
     def import_spreadsheet(self):
         self.wedges = []
 
-        # Downlaod spreadsheet from Google
-        with httpx.Client() as client:
-            s_config = settings["spreadsheet"]
-            rows = self.get_sheet_rows(client, s_config["column"])
+        # Setup list of columns to scan
+        s_config = settings["spreadsheet"]
+        columns_to_scan = [s_config["column"]]
+        if s_config["sub_column"]:
+            columns_to_scan.append(s_config["sub_column"])
+        if s_config["extra_columns"]:
+            for c in s_config["extra_columns"]:
+                columns_to_scan.append(c)
 
-            if s_config["sub_column"]:
-                sub_rows = self.get_sheet_rows(client, s_config["sub_column"])
+        ranges = [f"{s_config['sheet']}!{c}{s_config['row']}:{c}" for c in columns_to_scan]
 
-            if s_config["extra_columns"]:
-                extra_rows = []    
-                for column in s_config["extra_columns"]:
-                    extra_rows.append(self.get_sheet_rows(client,column))
+        params = {
+            "key": s_config["api_key"],
+            "ranges": ranges
+        }
+        r = requests.get(("https://sheets.googleapis.com/v4/spreadsheets/"
+            f"{s_config['id']}/values:batchGet"), params=params)
+        columns = r.json()["valueRanges"]
+
+        # Handle resulting 
+        rows = columns[0]["values"]
+        columns.pop(0)
+        if s_config["sub_column"]:
+            sub_rows = columns[0]["values"]
+            columns.pop(0)
+        if s_config['extra_columns']:
+            extra_rows = []
+            for c in s_config["extra_columns"]:
+                extra_rows.append(columns[0]["values"])
+                columns.pop(0)
 
         # Grab all values, filter out empty and handle dupe logic
         temp_wedges = []
