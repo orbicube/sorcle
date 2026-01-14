@@ -19,8 +19,16 @@
 [wheel]
 font = "Arial"
 colors = [ # RGB arrays of colors to use for wedges; font colour will change to match
-	[255,128,0],
-	[0,128,255]
+	[255,96,38],
+	[255,212,38],
+	[98,179,179],
+	[82,33,217],
+	[217,50,94],
+	[178,146,98],
+	[129,217,85],
+	[140,163,255],
+	[217,85,190],
+	[255,0,42]
 ]
 # Remove duplicate entries from the results; if false then entries will be combined
 remove_dupes = false
