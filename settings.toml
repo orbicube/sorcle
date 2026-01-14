@@ -6,8 +6,14 @@
 "sheet" = "Queue"
 # Row number to start from, indexing from 1
 "row" = 3
-# Column to scan, in letter notation
+# Column to scan, in letter notation. Written to winner.txt
 "column" = "C"
+# Optional secondary column to display under winner and written to file. Written to sub.txt
+# Leave as "" if not required
+"sub_column" = "E" 
+# Extra columns, only written to files (extra1.txt, extra2.txt, ...)
+# Leave as [] if not required
+"extra_columns" = ["D", "B"] 
 
 [wheel]
 font = "Arial"

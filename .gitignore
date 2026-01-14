@@ -185,3 +185,6 @@ test.py
 certificate.pfx
 version.txt
 perf.prof
+extras1.txt
+extras2.txt
+sub.txt

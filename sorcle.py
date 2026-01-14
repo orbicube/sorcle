@@ -29,13 +29,15 @@ def get_text_color(color):
 
 class Wedge(pyglet.shapes.Sector):
 
-    def __init__(self, name, start_angle, angle, color, 
+    def __init__(self, name, sub, extras, start_angle, angle, color, 
         wedge_group, text_group, batch):
         super().__init__(x = 500, y = 500, radius=495,
             start_angle = start_angle, angle = angle, color = color,
             group = wedge_group, batch=batch)
 
         self.name = name
+        self.sub = sub
+        self.extras = extras
 
         # Trim name if too long
         if len(name) > 23:
@@ -70,7 +72,8 @@ class Wheel:
         self.spinning = False
         self.finished = False
         self.idle = True
-        self.selected = {"name": "", "color": (0,0,0,0)}
+        self.selected = {"name": "", "sub": "", "extras": [],
+            "color": (0,0,0,0)}
 
         self.batch = batch
         self.wedge_group = pyglet.graphics.Group(order=0)
@@ -97,32 +100,53 @@ class Wheel:
 
         self.import_spreadsheet()
 
+    def get_sheet_rows(self, column):
+        s_config = settings["spreadsheet"]
+
+        params = {
+            "key": s_config["api_key"],
+            "ranges": f"{s_config['sheet']}!{column}{s_config['row']}:{column}"
+        }
+        r = requests.get(("https://sheets.googleapis.com/v4/spreadsheets/"
+            f"{s_config['id']}/values:batchGet"), params=params)
+        return r.json()["valueRanges"][0]["values"]
+
+
     def import_spreadsheet(self):
         self.wedges = []
 
         # Downlaod spreadsheet from Google
         s_config = settings["spreadsheet"]
-        params = {
-            "key": s_config["api_key"],
-            "ranges": f"{s_config['sheet']}!{s_config['column']}{s_config['row']}:{s_config['column']}"
-        }
-        r = requests.get(("https://sheets.googleapis.com/v4/spreadsheets/"
-            f"{s_config['id']}/values:batchGet"), params=params)
-        rows = r.json()["valueRanges"][0]["values"]
+        rows = self.get_sheet_rows(s_config["column"])
+
+        if s_config["sub_column"]:
+            sub_rows = self.get_sheet_rows(s_config["sub_column"])
+
+        if s_config["extra_columns"]:
+            extra_rows = []    
+            for column in s_config["extra_columns"]:
+                extra_rows.append(self.get_sheet_rows(column))
 
         # Grab all values, filter out empty and handle dupe logic
         temp_wedges = []
         for row in rows:
+            try: sub = sub_rows[rows.index(row)][0]
+            except: sub = ""
+            try: extras = [x[rows.index(row)][0] for x in extra_rows]
+            except: extras = []
+
+            wedge_dict = {"name": row[0], "sub": sub, "extras": extras }
+
             # Filter out dupe games if setting is true
             if settings["wheel"]["remove_dupes"]:
                 if row and (row[0] not in temp_wedges):
-                    temp_wedges.append(row[0])
+                    temp_wedges.append(wedge_dict)
             # Otherwise, put the dupes next to each other to combine later
             else:
                 if row and (row[0] in temp_wedges):
-                    temp_wedges.insert(temp_wedges.index(row[0]), row[0])
+                    temp_wedges.insert(temp_wedges.index(row[0]), wedge_dict)
                 elif row:
-                    temp_wedges.append(row[0])
+                    temp_wedges.append(wedge_dict)
 
         # Calculate angle for wedges
         wedge_num = len(temp_wedges)
@@ -136,7 +160,7 @@ class Wheel:
             dupe_wedge = False
             if not settings["wheel"]["remove_dupes"]:
                 if curr_wedge > 0:
-                    if wedge == self.wedges[-1].name:
+                    if wedge["name"] == self.wedges[-1].name:
                         dupe_wedge = True
                         self.wedges[-1].angle += angle_per_wedge
                         self.wedges[-1].label.rotation -= (angle_per_wedge / 2)
@@ -153,7 +177,8 @@ class Wheel:
                 color = choice(valid_colors)
                 prev_color = color
 
-                self.wedges.append(Wedge(name=wedge, start_angle=curr_angle,
+                self.wedges.append(Wedge(name=wedge["name"], sub=wedge["sub"],
+                    extras=wedge["extras"], start_angle=curr_angle,
                     angle=angle_per_wedge, color=color, batch=self.batch,
                     wedge_group=self.wedge_group, text_group=self.text_group))
 
@@ -170,6 +195,8 @@ class Wheel:
             if self.spinning and is_selected:
                 if self.selected["name"] != wedge.name:
                     self.selected["name"] = wedge.name
+                    self.selected["sub"] = wedge.sub
+                    self.selected["extras"] = wedge.extras
                     self.selected["color"] = wedge.color[:-1]
 
 
@@ -219,9 +246,60 @@ class Sorcle(pyglet.window.Window):
         self.player = None
 
         self.winner_group = pyglet.graphics.Group(order=5)
-        self.winner = None
+        self.winner_label = None
         self.background_group = pyglet.graphics.Group(order=4)
         self.winner_bg = None
+        self.sub = None
+
+
+    def handle_win(self, winner):
+        with open(path.join(w_dir, "winner.txt"), 'w') as f:
+            f.write(winner["name"])
+
+        if winner["sub"]:
+            with open(path.join(w_dir, "sub.txt"), 'w') as f:
+                f.write(winner["sub"])
+
+        if winner["extras"]:
+            ex_count = 1
+            for column in winner["extras"]:
+                with open(path.join(w_dir, f"extras{ex_count}.txt"), 'w') as f:
+                    f.write(column)
+                ex_count += 1
+
+        if not settings["wheel"]["suppress_win"]:
+            finished = pyglet.media.load(
+                path.join(w_dir, settings["finished"]["file"]))
+            finished.play().volume = settings["finished"]["volume"]
+
+            # Print winner name
+            self.winner_label = pyglet.text.Label(winner["name"],
+                font_name=settings["wheel"]["font"], font_size=64, 
+                width=900, multiline=True, x=500, y=500, 
+                color=get_text_color(winner["color"]),
+                anchor_x='center', anchor_y='center', align='center',
+                group=self.winner_group, batch=self.batch)
+
+            self.winner_bg = pyglet.shapes.Rectangle(
+                x=500-(self.winner_label.content_width/2)-25,
+                y=500-(self.winner_label.content_height/2)-25,
+                width=self.winner_label.content_width+50,
+                height=self.winner_label.content_height+50,
+                color=winner["color"],
+                group=self.background_group, batch=self.batch)
+
+            if winner["sub"]:
+                self.sub = pyglet.text.Label(winner["sub"],
+                    font_name=settings["wheel"]["font"], font_size=32,
+                    width=self.winner_label.content_width, multiline=True,
+                    x=500, y=500-(self.winner_label.content_height/2)-25,
+                    color=get_text_color(winner["color"]),
+                    anchor_x='center', anchor_y='top', align='center',
+                    group=self.winner_group, batch=self.batch)
+
+                self.winner_bg.y = self.winner_bg.y-self.sub.content_height-25
+                self.winner_bg.height = self.winner_bg.height+self.sub.content_height+25
+
 
 
     def on_draw(self):
@@ -249,30 +327,7 @@ class Sorcle(pyglet.window.Window):
             if self.velocity < 0:
                 self.wheel.spinning = False
 
-                # Silently print to file
-                with open(path.join(w_dir, "winner.txt"), 'w') as f:
-                    f.write(self.wheel.selected["name"])
-                
-                if not settings["wheel"]["suppress_win"]:
-                    finished = pyglet.media.load(
-                        path.join(w_dir, settings["finished"]["file"]))
-                    finished.play().volume = settings["finished"]["volume"]
-
-                    # Print winner name
-                    self.winner = pyglet.text.Label(self.wheel.selected["name"],
-                        font_name=settings["wheel"]["font"], font_size=64, 
-                        width=900, multiline=True, x=500, y=500, 
-                        color=get_text_color(self.wheel.selected["color"]),
-                        anchor_x='center', anchor_y='center', align='center',
-                        group=self.winner_group, batch=self.batch)
-
-                    self.winner_bg = pyglet.shapes.Rectangle(
-                        x=500-(self.winner.content_width/2)-25,
-                        y=500-(self.winner.content_height/2)-25,
-                        width=self.winner.content_width+50,
-                        height=self.winner.content_height+50,
-                        color=self.wheel.selected["color"],
-                        group=self.background_group, batch=self.batch)
+                self.handle_win(self.wheel.selected)
 
                 # Delete trigger files to mitigate accidental presses
                 if pathlib.Path(path.join(w_dir, "spin")).is_file():
@@ -286,18 +341,22 @@ class Sorcle(pyglet.window.Window):
 
             if pathlib.Path(path.join(w_dir, "import")).is_file():
                 # Clear winner on re-import
-                if self.winner:
-                    self.winner = None
+                if self.winner_label:
+                    self.winner_label = None
                     self.winner_bg = None
+                    if self.sub:
+                        self.sub = None
 
                 self.wheel = Wheel(self.sprite_group, self.batch)
                 os.remove(path.join(w_dir, "import"))
 
             elif pathlib.Path(path.join(w_dir, "spin")).is_file():
                 # Clear winner on re-spin
-                if self.winner:
-                    self.winner = None
-                    self.winner_bg = None      
+                if self.winner_label:
+                    self.winner_label = None
+                    self.winner_bg = None
+                    if self.sub:
+                        self.sub = None      
 
                 self.wheel.spinning = True
                 self.wheel.idle = False
