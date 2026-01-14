@@ -64,7 +64,10 @@ class Wedge(pyglet.shapes.Sector):
         self.rotation = (self.rotation + velocity) % 360
         self.label.rotation = (self.label.rotation + velocity) % 360
 
-        return (self.rotation  - self.start_angle) % 360 < self.rotation
+        if self.start_angle == 0.0:
+            return self.rotation < self.angle
+        else:
+            return (self.rotation - self.start_angle) % 360 < self.rotation
 
 class Wheel:
     
@@ -146,7 +149,7 @@ class Wheel:
                         temp_wedges.append(wedge_dict)
                 # Otherwise, put the dupes next to each other to combine later
                 else:
-                    if row[0] in prev_wedges:
+                    if row[0] in prev_wedges and settings["wheel"]["combine_dupes"]:
                         temp_wedges.insert(prev_wedges.index(row[0]),
                             wedge_dict)
                     else:
@@ -156,18 +159,19 @@ class Wheel:
         wedge_num = len(temp_wedges)
         angle_per_wedge = 360 / wedge_num
 
-        curr_angle = 0
+        curr_angle = 0.0
         curr_wedge = 0
         prev_color = (0,0,0)
         for wedge in temp_wedges:
 
             dupe_wedge = False
             if not settings["wheel"]["remove_dupes"]:
-                if curr_wedge > 0:
-                    if wedge["name"] == self.wedges[-1].name:
-                        dupe_wedge = True
-                        self.wedges[-1].angle += angle_per_wedge
-                        self.wedges[-1].label.rotation -= (angle_per_wedge / 2)
+                if settings["wheel"]["combine_dupes"]:
+                    if curr_wedge > 0:
+                        if wedge["name"] == self.wedges[-1].name:
+                            dupe_wedge = True
+                            self.wedges[-1].angle += angle_per_wedge
+                            self.wedges[-1].label.rotation -= (angle_per_wedge / 2)
 
             if not dupe_wedge:
                 # Ensure no color dupes, can't do random.sample() unfortunately
@@ -177,7 +181,8 @@ class Wheel:
                     valid_colors.remove(prev_color)
                 # Make sure first and last aren't the same
                 if curr_wedge == wedge_num-1 and self.wedges[0].color[:-1] != prev_color:
-                    valid_colors.remove(self.wedges[0].color[:-1])
+                    if len(valid_colors) > 1:
+                        valid_colors.remove(self.wedges[0].color[:-1])
                 color = choice(valid_colors)
                 prev_color = color
 
@@ -188,6 +193,7 @@ class Wheel:
 
             curr_angle += angle_per_wedge
             curr_wedge += 1
+
 
     def rotate(self, velocity):
         if settings["center"]["rotate"]:
@@ -278,8 +284,6 @@ class Sorcle(pyglet.window.Window):
                     f.write(column)
                 ex_count += 1
 
-
-
         if not settings["wheel"]["suppress_win"]:
             finished = pyglet.media.load(
                 path.join(w_dir, settings["finished"]["file"]))
@@ -294,8 +298,8 @@ class Sorcle(pyglet.window.Window):
                 group=self.winner_group, batch=self.batch)
 
             self.winner_bg = pyglet.shapes.Rectangle(
-                x=500-(self.winner_label.content_width/2)-25,
-                y=500-(self.winner_label.content_height/2)-25,
+                x=500-(self.winner_label.content_width//2)-25,
+                y=500-(self.winner_label.content_height//2)-25,
                 width=self.winner_label.content_width+50,
                 height=self.winner_label.content_height+50,
                 color=winner["color"],
@@ -304,14 +308,20 @@ class Sorcle(pyglet.window.Window):
             if winner["sub"]:
                 self.sub = pyglet.text.Label(winner["sub"],
                     font_name=settings["wheel"]["font"], font_size=32,
-                    width=self.winner_label.content_width, multiline=True,
-                    x=500, y=500-(self.winner_label.content_height/2)-25,
+                    width=900, multiline=True,
+                    x=500, y=500-(self.winner_label.content_height//2)-25,
                     color=get_text_color(winner["color"]),
                     anchor_x='center', anchor_y='top', align='center',
                     group=self.winner_group, batch=self.batch)
 
-                self.winner_bg.y = self.winner_bg.y-self.sub.content_height-25
-                self.winner_bg.height = self.winner_bg.height+self.sub.content_height+25
+                if self.sub.content_width > self.winner_label.content_width:
+                    self.winner_bg.width = self.sub.content_width+50
+                    self.winner_bg.x=500-(self.sub.content_width//2)-25
+
+                self.winner_bg.height += self.sub.content_height + 50
+                self.winner_bg.y = 500-((self.winner_label.content_height+self.sub.content_height)//2)-50
+                self.winner_label.y += (self.sub.content_height//2)
+                self.sub.y += (self.sub.content_height//2)
 
 
 

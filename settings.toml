@@ -8,33 +8,29 @@
 "row" = 3
 # Column to scan, in letter notation. Written to winner.txt
 "column" = "C"
-# Optional secondary column to display under winner and written to file. Written to sub.txt
+# Optional secondary column to display under winner and written to sub.txt
 # Leave as "" if not required
-"sub_column" = "E" 
+"sub_column" = "D" 
 # Extra columns, only written to files (extra1.txt, extra2.txt, ...)
 # Leave as [] if not required
-"extra_columns" = ["D", "B"] 
+"extra_columns" = ["E", "B"] 
+
 
 [wheel]
 font = "Arial"
 colors = [ # RGB arrays of colors to use for wedges; font colour will change to match
-	[255,96,38],
-	[255,212,38],
-	[98,179,179],
-	[82,33,217],
-	[217,50,94],
-	[178,146,98],
-	[129,217,85],
-	[140,163,255],
-	[217,85,190],
-	[255,0,42]
+	[255,128,0],
+	[0,128,255]
 ]
 # Remove duplicate entries from the results; if false then entries will be combined
 remove_dupes = false
+# If above is false, then this option will combine dupe wedges into a single, bigger wedge
+combine_dupes = true
 # Suppress winner notification if handling visuals elsewhere
 suppress_win = false
 # How fast the wheel decelerates; bigger number is faster (1.0 = -1% of current speed per tick)
 decel_rate = 1.0
+
 
 [pointer] # Image that points to the result of the wheel
 # Can be animated GIF or any other arbitrary image type
@@ -58,6 +54,7 @@ decel_rate = 1.0
 [finished] # Sound played when wheel finishes spinning
 "file" = "finished.wav" # WAV only
 "volume" = 1.0
+
 
 [window]
 # Whether to use nearest neighbour scaling for pixel art sprites
