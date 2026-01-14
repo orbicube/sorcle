@@ -4,6 +4,7 @@ import pathlib
 import sys, os
 from os import path
 from random import choice, randint
+from glob import glob
 
 from text_fix import ArcadeTextLayoutGroup
 
@@ -130,23 +131,27 @@ class Wheel:
         # Grab all values, filter out empty and handle dupe logic
         temp_wedges = []
         for row in rows:
-            try: sub = sub_rows[rows.index(row)][0]
-            except: sub = ""
-            try: extras = [x[rows.index(row)][0] for x in extra_rows]
-            except: extras = []
+            if row:
+                try: sub = sub_rows[rows.index(row)][0]
+                except: sub = ""
+                try: extras = [x[rows.index(row)][0] for x in extra_rows]
+                except: extras = []
 
-            wedge_dict = {"name": row[0], "sub": sub, "extras": extras }
+                wedge_dict = {"name": row[0], "sub": sub, "extras": extras }
 
-            # Filter out dupe games if setting is true
-            if settings["wheel"]["remove_dupes"]:
-                if row and (row[0] not in temp_wedges):
-                    temp_wedges.append(wedge_dict)
-            # Otherwise, put the dupes next to each other to combine later
-            else:
-                if row and (row[0] in temp_wedges):
-                    temp_wedges.insert(temp_wedges.index(row[0]), wedge_dict)
-                elif row:
-                    temp_wedges.append(wedge_dict)
+
+                prev_wedges = [w["name"] for w in temp_wedges]
+                # Filter out dupe games if setting is true
+                if settings["wheel"]["remove_dupes"]:
+                    if row[0] not in prev_wedges:
+                        temp_wedges.append(wedge_dict)
+                # Otherwise, put the dupes next to each other to combine later
+                else:
+                    if row[0] in prev_wedges:
+                        temp_wedges.insert(temp_wedges.index(row[0]),
+                            wedge_dict)
+                    else:
+                        temp_wedges.append(wedge_dict)
 
         # Calculate angle for wedges
         wedge_num = len(temp_wedges)
@@ -259,13 +264,22 @@ class Sorcle(pyglet.window.Window):
         if winner["sub"]:
             with open(path.join(w_dir, "sub.txt"), 'w') as f:
                 f.write(winner["sub"])
+        else:
+            with open(path.join(w_dir, "sub.txt"), 'w') as f:
+                f.write("")
 
+        extras_files = glob(path.join(w_dir,"extras*.txt"))
+        for file in extras_files:
+            with open(file, 'w') as f:
+                f.write("")
         if winner["extras"]:
             ex_count = 1
             for column in winner["extras"]:
                 with open(path.join(w_dir, f"extras{ex_count}.txt"), 'w') as f:
                     f.write(column)
                 ex_count += 1
+
+
 
         if not settings["wheel"]["suppress_win"]:
             finished = pyglet.media.load(
