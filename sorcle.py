@@ -264,14 +264,14 @@ class Sorcle(pyglet.window.Window):
 
 
     def handle_win(self, winner):
-        with open(path.join(w_dir, "winner.txt"), 'w') as f:
+        with open(path.join(w_dir, "winner.txt"), 'w', encoding='utf-8') as f:
             f.write(winner["name"])
 
         if winner["sub"]:
-            with open(path.join(w_dir, "sub.txt"), 'w') as f:
+            with open(path.join(w_dir, "sub.txt"), 'w', encoding='utf-8') as f:
                 f.write(winner["sub"])
         else:
-            with open(path.join(w_dir, "sub.txt"), 'w') as f:
+            with open(path.join(w_dir, "sub.txt"), 'w', encoding='utf-8') as f:
                 f.write("")
 
         extra_files = glob(path.join(w_dir,"extra*.txt"))
@@ -281,7 +281,7 @@ class Sorcle(pyglet.window.Window):
         if winner["extras"]:
             ex_count = 1
             for column in winner["extras"]:
-                with open(path.join(w_dir, f"extra{ex_count}.txt"), 'w') as f:
+                with open(path.join(w_dir, f"extra{ex_count}.txt"), 'w', encoding='utf-8') as f:
                     f.write(column)
                 ex_count += 1
 
