@@ -135,14 +135,13 @@ class Wheel:
         temp_wedges = []
         for row in rows:
             if row:
-                try: sub = sub_rows[rows.index(row)][0].replace("\\n","\n")
+                try: sub = sub_rows[rows.index(row)][0]
                 except: sub = ""
-                try: extras = [x[rows.index(row)][0].replace("\\n","\n") for x in extra_rows]
+                try: extras = [x[rows.index(row)][0] for x in extra_rows]
                 except: extras = []
 
                 wedge_dict = {
-                    "name": row[0].replace("\\n", "\n"),
-                    "sub": sub, "extras": extras }
+                    "name": row[0], "sub": sub, "extras": extras }
 
                 prev_wedges = [w["name"] for w in temp_wedges]
                 # Filter out dupe games if setting is true
