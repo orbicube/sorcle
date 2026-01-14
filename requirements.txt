@@ -1,2 +1,2 @@
+httpx==0.28.1
 pyglet==2.1.12
-requests==2.32.5

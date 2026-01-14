@@ -1,10 +1,10 @@
 import pyglet
-import requests
 import pathlib
 import sys, os
 from os import path
 from random import choice, randint
 from glob import glob
+import httpx
 
 from text_fix import ArcadeTextLayoutGroup
 
@@ -71,7 +71,7 @@ class Wedge(pyglet.shapes.Sector):
 
 class Wheel:
     
-    def __init__(self, sprite_group, batch):
+    def __init__(self, center_sprite, batch):
         self.wedges = []
         self.spinning = False
         self.finished = False
@@ -81,39 +81,26 @@ class Wheel:
 
         self.batch = batch
         self.wedge_group = pyglet.graphics.Group(order=0)
-        self.text_group = pyglet.graphics.Group(order=0)
+        self.text_group = pyglet.graphics.Group(order=1)
+
+        self.center_sprite = center_sprite
 
         self.colors = []
         for color in settings["wheel"]["colors"]:
             self.colors.append(tuple(color))
 
-        self.center_sprite = None
-        # Set anchor for center image 
-        if settings["center"]["file"].rsplit(".")[1] == "gif":
-            center = pyglet.resource.animation(settings["center"]["file"])
-            for f in center.frames:
-                f.image.anchor_x = f.image.width//2
-                f.image.anchor_y = f.image.height//2
-        else:
-            center = pyglet.image.load(
-                path.join(w_dir, settings["center"]["file"]))
-            center.anchor_x = center.width//2
-            center.anchor_y = center.height//2
-        self.center_sprite = pyglet.sprite.Sprite(center,
-            x=500, y=500, group=sprite_group, batch=batch)
-        self.center_sprite.update(scale=settings["center"]["scale"])
-
         self.import_spreadsheet()
 
-    def get_sheet_rows(self, column):
+    def get_sheet_rows(self, client, column):
         s_config = settings["spreadsheet"]
 
         params = {
             "key": s_config["api_key"],
             "ranges": f"{s_config['sheet']}!{column}{s_config['row']}:{column}"
         }
-        r = requests.get(("https://sheets.googleapis.com/v4/spreadsheets/"
+        r = client.get(("https://sheets.googleapis.com/v4/spreadsheets/"
             f"{s_config['id']}/values:batchGet"), params=params)
+
         return r.json()["valueRanges"][0]["values"]
 
 
@@ -121,16 +108,17 @@ class Wheel:
         self.wedges = []
 
         # Downlaod spreadsheet from Google
-        s_config = settings["spreadsheet"]
-        rows = self.get_sheet_rows(s_config["column"])
+        with httpx.Client() as client:
+            s_config = settings["spreadsheet"]
+            rows = self.get_sheet_rows(client, s_config["column"])
 
-        if s_config["sub_column"]:
-            sub_rows = self.get_sheet_rows(s_config["sub_column"])
+            if s_config["sub_column"]:
+                sub_rows = self.get_sheet_rows(client, s_config["sub_column"])
 
-        if s_config["extra_columns"]:
-            extra_rows = []    
-            for column in s_config["extra_columns"]:
-                extra_rows.append(self.get_sheet_rows(column))
+            if s_config["extra_columns"]:
+                extra_rows = []    
+                for column in s_config["extra_columns"]:
+                    extra_rows.append(self.get_sheet_rows(client,column))
 
         # Grab all values, filter out empty and handle dupe logic
         temp_wedges = []
@@ -230,14 +218,27 @@ class Sorcle(pyglet.window.Window):
 
         #self.fps_display = pyglet.window.FPSDisplay(self)
         self.batch = pyglet.graphics.Batch()
-        self.sprite_group = pyglet.graphics.Group(order=3)
 
         self.initial_velocity = 25
 
-        self.wheel = Wheel(self.sprite_group, self.batch)
+        self.sprite_group = pyglet.graphics.Group(order=3)
+        if settings["center"]["file"].rsplit(".")[1] == "gif":
+            center = pyglet.resource.animation(settings["center"]["file"])
+            for f in center.frames:
+                f.image.anchor_x = f.image.width//2
+                f.image.anchor_y = f.image.height//2
+        else:
+            center = pyglet.image.load(
+                path.join(w_dir, settings["center"]["file"]))
+            center.anchor_x = center.width//2
+            center.anchor_y = center.height//2
+        self.center_sprite = pyglet.sprite.Sprite(center,
+            x=500, y=500, group=self.sprite_group, batch=self.batch)
+        self.center_sprite.update(scale=settings["center"]["scale"])
+
+        self.wheel = Wheel(self.center_sprite, self.batch)
 
         # Position pointer, change anchor keeping centered regardless of size
-        pyglet.resource.path = [w_dir]
         if settings["pointer"]["file"].rsplit(".")[1] == "gif":
             pointer = pyglet.resource.animation(settings["pointer"]["file"])
             for f in pointer.frames:
@@ -320,7 +321,7 @@ class Sorcle(pyglet.window.Window):
                     self.winner_bg.width = self.sub.content_width+50
                     self.winner_bg.x=500-(self.sub.content_width//2)-25
 
-                self.winner_bg.height += self.sub.content_height + 50
+                self.winner_bg.height += self.sub.content_height + 25
                 self.winner_bg.y = 500-((self.winner_label.content_height+self.sub.content_height)//2)-50
                 self.winner_label.y += (self.sub.content_height//2)
                 self.sub.y += (self.sub.content_height//2)
@@ -372,7 +373,8 @@ class Sorcle(pyglet.window.Window):
                     if self.sub:
                         self.sub = None
 
-                self.wheel = Wheel(self.sprite_group, self.batch)
+                self.wheel = None
+                self.wheel = Wheel(self.center_sprite, self.batch)
                 os.remove(path.join(w_dir, "import"))
 
             elif pathlib.Path(path.join(w_dir, "spin")).is_file():
