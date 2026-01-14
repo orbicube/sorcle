@@ -139,7 +139,6 @@ class Wheel:
 
                 wedge_dict = {"name": row[0], "sub": sub, "extras": extras }
 
-
                 prev_wedges = [w["name"] for w in temp_wedges]
                 # Filter out dupe games if setting is true
                 if settings["wheel"]["remove_dupes"]:
@@ -148,7 +147,7 @@ class Wheel:
                 # Otherwise, put the dupes next to each other to combine later
                 else:
                     if row[0] in prev_wedges:
-                        temp_wedges.insert(temp_wedges.index(row[0]),
+                        temp_wedges.insert(prev_wedges.index(row[0]),
                             wedge_dict)
                     else:
                         temp_wedges.append(wedge_dict)
