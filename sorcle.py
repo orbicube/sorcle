@@ -87,6 +87,7 @@ class Wheel:
         for color in settings["wheel"]["colors"]:
             self.colors.append(tuple(color))
 
+        self.center_sprite = None
         # Set anchor for center image 
         if settings["center"]["file"].rsplit(".")[1] == "gif":
             center = pyglet.resource.animation(settings["center"]["file"])
