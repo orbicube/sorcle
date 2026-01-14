@@ -268,14 +268,14 @@ class Sorcle(pyglet.window.Window):
             with open(path.join(w_dir, "sub.txt"), 'w') as f:
                 f.write("")
 
-        extras_files = glob(path.join(w_dir,"extras*.txt"))
-        for file in extras_files:
+        extra_files = glob(path.join(w_dir,"extra*.txt"))
+        for file in extra_files:
             with open(file, 'w') as f:
                 f.write("")
         if winner["extras"]:
             ex_count = 1
             for column in winner["extras"]:
-                with open(path.join(w_dir, f"extras{ex_count}.txt"), 'w') as f:
+                with open(path.join(w_dir, f"extra{ex_count}.txt"), 'w') as f:
                     f.write(column)
                 ex_count += 1
 
