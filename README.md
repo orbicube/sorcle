@@ -26,7 +26,9 @@ api_key: String # Create one at https://console.cloud.google.com/apis/api/sheets
 id: String # found between /d/ and /edit in url of a Google Sheets spreadsheet
 sheet: String # Sheet name, Sheet1 if you haven't renamed one
 row: Integer # Row number to start from, indexing from 1
-column: # Column to scan, in letter noation
+column: String # Column to scan, in letter noation
+sub_column: String # Optional secondary column to display under winner and written to sub.txt
+extra_columns: Array # Optional extra columns written to files extra1.txt, extra2.txt, etc.
 
 [wheel]
 font: String # Font installed in the system
