@@ -1,19 +1,26 @@
 [spreadsheet]
-# Insert Google API key https://console.cloud.google.com/apis/api/sheets.googleapis.com/
-"api_key" = ""
 # found between /d/ and /edit in url of a Google Sheets spreadsheet
 "id" = "14f2IPkBaMliBQk7R9JWyQUCPs6u47kmug4BUyelVN7U"
 "sheet" = "Queue"
 # Row number to start from, indexing from 1
 "row" = 3
-# Column to scan, in letter notation. Written to winner.txt
-"column" = "C"
+# Primary column. Written to winner.txt
+"primary_column" = "C"
 # Optional secondary column to display under winner and written to sub.txt
 # Leave as "" if not required
 "sub_column" = "D" 
 # Extra columns, only written to files (extra1.txt, extra2.txt, ...)
 # Leave as [] if not required
-"extra_columns" = ["E", "B"] 
+"extra_columns" = ["E", "B"]
+
+[move]
+# If true, will move columns into another sheet
+# Triggers on detection of "move" file with text withing being added as a column
+"enabled" = true
+"sheet" = "History (2026)"
+"column" = "B"
+"row" = 3
+"prepend_date" = true
 
 
 [wheel]

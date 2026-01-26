@@ -5,6 +5,7 @@ from os import path
 from random import choice, randint
 from glob import glob
 import requests
+from datetime import datetime
 
 from text_fix import ArcadeTextLayoutGroup
 
@@ -17,9 +18,11 @@ pyglet.resource.path = [str(w_dir)]
 import tomllib
 with open(path.join(w_dir, "settings.toml"), "rb") as f:
     settings = tomllib.load(f)
-    
-    if not settings["spreadsheet"]["api_key"]:
-        raise ValueError("Couldn't find an API key in settings.toml")
+
+import gspread
+client = gspread.service_account(filename=path.join(w_dir, "account.json"))
+spreadsheet = client.open_by_key(settings["spreadsheet"]["id"])
+sheet = spreadsheet.worksheet(settings["spreadsheet"]["sheet"])
 
 def get_text_color(color):
     color_intensity = (color[0]*.299 + color[1]*.587 + color[2]*.114)
@@ -28,9 +31,33 @@ def get_text_color(color):
     else:
         return (255, 255, 255)
 
+def delete_files():
+    if pathlib.Path(path.join(w_dir, "spin")).is_file():
+        os.remove(path.join(w_dir, "spin"))
+    if pathlib.Path(path.join(w_dir, "import")).is_file():
+        os.remove(path.join(w_dir, "import"))
+    if pathlib.Path(path.join(w_dir, "move")).is_file():
+        os.remove(path.join(w_dir, "move"))
+
+def col_to_int(col):
+    num = 0
+    for c in col:
+        if c in string.ascii_letters:
+            num = num * 26 + (ord(c.upper()) - ord('A')) + 1
+    return num
+
+def col_to_str(col):
+    letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    result = []
+    while col:
+        col, rem = divmod(digit-1, 26)
+        result[:0] = letters[rem]
+    return ''.join(result)
+
 class Wedge(pyglet.shapes.Sector):
 
-    def __init__(self, name, sub, extras, start_angle, angle, color, 
+    def __init__(self, name, sub, extras, rows, 
+        start_angle, angle, color, 
         wedge_group, text_group, batch):
         super().__init__(x = 500, y = 500, radius=495,
             start_angle = start_angle, angle = angle, color = color,
@@ -39,6 +66,7 @@ class Wedge(pyglet.shapes.Sector):
         self.name = name
         self.sub = sub
         self.extras = extras
+        self.rows = rows
 
         # Trim name if too long
         if len(name) > 23:
@@ -97,7 +125,7 @@ class Wheel:
 
         # Setup list of columns to scan
         s_config = settings["spreadsheet"]
-        columns_to_scan = [s_config["column"]]
+        columns_to_scan = [s_config["primary_column"]]
         if s_config["sub_column"]:
             columns_to_scan.append(s_config["sub_column"])
         if s_config["extra_columns"]:
@@ -105,25 +133,18 @@ class Wheel:
                 columns_to_scan.append(c)
 
         ranges = [f"{s_config['sheet']}!{c}{s_config['row']}:{c}" for c in columns_to_scan]
-
-        params = {
-            "key": s_config["api_key"],
-            "ranges": ranges
-        }
-        r = requests.get(("https://sheets.googleapis.com/v4/spreadsheets/"
-            f"{s_config['id']}/values:batchGet"), params=params)
-        columns = r.json()["valueRanges"]
+        columns = sheet.batch_get(ranges)
 
         # Handle resulting 
-        rows = columns[0]["values"]
+        rows = columns[0]
         columns.pop(0)
         if s_config["sub_column"]:
-            sub_rows = columns[0]["values"]
+            sub_rows = columns[0]
             columns.pop(0)
         if s_config['extra_columns']:
             extra_rows = []
             for c in s_config["extra_columns"]:
-                extra_rows.append(columns[0]["values"])
+                extra_rows.append(columns[0])
                 columns.pop(0)
 
         # Grab all values, filter out empty and handle dupe logic
@@ -136,7 +157,8 @@ class Wheel:
                 except: extras = []
 
                 wedge_dict = {
-                    "name": row[0], "sub": sub, "extras": extras }
+                    "name": row[0], "sub": sub, "extras": extras,
+                    "rows": [rows.index(row) + s_config["row"]]}
 
                 prev_wedges = [w["name"] for w in temp_wedges]
                 # Filter out dupe games if setting is true
@@ -168,6 +190,7 @@ class Wheel:
                             dupe_wedge = True
                             self.wedges[-1].angle += angle_per_wedge
                             self.wedges[-1].label.rotation -= (angle_per_wedge / 2)
+                            self.wedges[-1].rows.extend(wedge["rows"])
 
             if not dupe_wedge:
                 # Ensure no color dupes, can't do random.sample() unfortunately
@@ -191,6 +214,7 @@ class Wheel:
             curr_wedge += 1
 
 
+
     def rotate(self, velocity):
         if settings["center"]["rotate"]:
             self.center_sprite.rotation = (
@@ -204,6 +228,7 @@ class Wheel:
                     self.selected["sub"] = wedge.sub
                     self.selected["extras"] = wedge.extras
                     self.selected["color"] = wedge.color[:-1]
+                    self.selected["rows"] = wedge.rows
 
 
 class Sorcle(pyglet.window.Window):
@@ -333,6 +358,31 @@ class Sorcle(pyglet.window.Window):
                 self.sub.y += (self.sub.content_height//2)
 
 
+    def move_winner(self, winner, reason):
+
+        s_move = settings["move"]
+        move_sheet = spreadsheet.worksheet(s_move["sheet"])
+
+        move_rows = []
+        for row in winner.rows:
+
+            row_values = []
+            if s_move["prepend_date"]:
+                row_values.append(datetime.today().strftime("%m/%d/%Y"))
+
+            row_values.extend(sheet.row_values(row))
+
+            if reason:
+                row_values.append(reason)
+
+            move_rows.append(row_values)
+            sheet.delete_rows(row)
+
+        end_col = col_to_str(
+            col_to_int(s_move['start_column']) + len(move_rows[0]))
+        move_sheet.append_rows(move_rows,
+            table_range=f"{s_move['start_column']}{s_move['row']}:{end_col}9999")
+
 
     def on_draw(self):
         self.clear()
@@ -362,16 +412,28 @@ class Sorcle(pyglet.window.Window):
                 self.handle_win(self.wheel.selected)
 
                 # Delete trigger files to mitigate accidental presses
-                if pathlib.Path(path.join(w_dir, "spin")).is_file():
-                    os.remove(path.join(w_dir, "spin"))
-                if pathlib.Path(path.join(w_dir, "import")).is_file():
-                    os.remove(path.join(w_dir, "import"))
+                delete_files()
         else:
             if self.wheel.idle:
                 # Ambient rotating
                 self.wheel.rotate(0.02)
 
-            if pathlib.Path(path.join(w_dir, "import")).is_file():
+            else:
+                if settings["move"]["enabled"]:
+                    if pathlib.Path(path.join(w_dir, "move")).is_file():
+
+                        with open(pathlib.Path(path.join(w_dir, "move"))) as f:
+                            reason = f.read()
+
+                        self.move_winner(self.wheel.selected, reason)
+                        os.remove(path.join(w_dir, "move"))
+
+                        # Create an import file to refresh the wheel
+                        with open(pathlib.Path(path.join(w_dir, "import")), "w") as f:
+                            f.write(" ")
+
+
+            elif pathlib.Path(path.join(w_dir, "import")).is_file():
                 # Clear winner on re-import
                 if self.winner_label:
                     self.winner_label = None
@@ -401,10 +463,7 @@ class Sorcle(pyglet.window.Window):
         self.batch.draw()
 
 
-if pathlib.Path(path.join(w_dir, "spin")).is_file():
-    os.remove(path.join(w_dir, "spin"))
-if pathlib.Path(path.join(w_dir, "import")).is_file():
-    os.remove(path.join(w_dir, "import"))
+delete_files()
 
 config = pyglet.gl.Config()
 config.sample_buffers = 1
