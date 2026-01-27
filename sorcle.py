@@ -121,9 +121,6 @@ class Wheel:
         for color in settings["wheel"]["colors"]:
             self.colors.append(tuple(color))
 
-        self.left_col = 0
-        self.right_col = 0
-
         self.import_spreadsheet()
 
 
@@ -138,8 +135,6 @@ class Wheel:
         if s_config["extra_columns"]:
             for c in s_config["extra_columns"]:
                 columns_to_scan.append(c)
-
-        self.left_col, self.right_col = self.col_bounds(columns_to_scan)
 
         ranges = [f"{c}{s_config['row']}:{c}" for c in columns_to_scan]
         columns = sheet.batch_get(ranges)
@@ -167,7 +162,7 @@ class Wheel:
 
                 wedge_dict = {
                     "name": row[0], "sub": sub, "extras": extras,
-                    "rows": [rows.index(row) + s_config["row"]]}
+                    "rows": [len(temp_wedges) + s_config["row"]]}
 
                 prev_wedges = [w["name"] for w in temp_wedges]
                 # Filter out dupe games if setting is true
@@ -237,19 +232,6 @@ class Wheel:
                     self.selected["extras"] = wedge.extras
                     self.selected["color"] = wedge.color[:-1]
                     self.selected["rows"] = wedge.rows
-
-
-    def col_bounds(self, cols):
-        lowest = 99999999
-        highest = 0
-        for c in cols:
-            c_int = col_to_int(c)
-            if c_int < lowest:
-                lowest = c_int
-            elif c_int > highest:
-                highest = c_int
-
-        return lowest, highest
 
 
 class Sorcle(pyglet.window.Window):
@@ -383,15 +365,18 @@ class Sorcle(pyglet.window.Window):
         s_move = settings["move"]
         move_sheet = spreadsheet.worksheet(s_move["sheet"])
 
+        left_col = col_to_int(settings["spreadsheet"]["first_column"])
+        right_col = col_to_int(settings["spreadsheet"]["last_column"])
+
         move_rows = []
         for row in winner["rows"]:
 
             row_values = []
             if s_move["prepend_date"]:
-                row_values.append(datetime.today().strftime("%Y-%m-%d %H:%M:%S.%f"))
+                row_values.append(datetime.today().strftime(s_move["date_format"]))
 
             row_values.extend(
-                sheet.row_values(row)[self.wheel.left_col-1:])
+                sheet.row_values(row)[left_col-1:right_col])
 
             if reason:
                 row_values.append(reason)

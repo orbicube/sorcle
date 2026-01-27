@@ -2,6 +2,9 @@
 # found between /d/ and /edit in url of a Google Sheets spreadsheet
 "id" = "14f2IPkBaMliBQk7R9JWyQUCPs6u47kmug4BUyelVN7U"
 "sheet" = "Queue"
+# Left and right bound columns
+"first_column" = "B"
+"last_column" = "E"
 # Row number to start from, indexing from 1
 "row" = 3
 # Primary column. Written to winner.txt
@@ -24,6 +27,8 @@
 "row" = 3
 # Will add a date in the first column
 "prepend_date" = true
+# How to format the date in strftime formatting https://strftime.org/
+"date_format" = "%Y-%m-%d"
 
 
 [wheel]
