@@ -34,6 +34,7 @@ row: Integer # Row number to start from, indexing from 1
 primary_column: String # Column to scan, in letter noation
 sub_column: String # Optional secondary column to display under winner and written to sub.txt
 extra_columns: Array # Optional extra columns written to files extra1.txt, extra2.txt, etc.
+separator: String # Separator to use when writing multiple entries to files
 
 [move]
 enabled: Boolean # If true, will move columns into another sheet when "move" file is detected
