@@ -15,11 +15,14 @@
 
 [move]
 # If true, will move columns into another sheet
-# Triggers on detection of "move" file with text withing being added as a column
+# Triggers on detection of "move" file with text within being added as a column
 "enabled" = true
 "sheet" = "History (2026)"
+# Leftmost column for data on the sheet we're moving to
 "column" = "B"
+# Topmost row for data on the sheet we're moving to
 "row" = 3
+# Will put a date in the first column
 "prepend_date" = true
 
 
