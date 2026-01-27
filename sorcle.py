@@ -19,11 +19,13 @@ pyglet.resource.path = [str(w_dir)]
 import tomllib
 with open(path.join(w_dir, "settings.toml"), "rb") as f:
     settings = tomllib.load(f)
+s_move = settings["move"]
+s_config = settings["spreadsheet"]
 
 import gspread
 client = gspread.service_account(filename=path.join(w_dir, "account.json"))
-spreadsheet = client.open_by_key(settings["spreadsheet"]["id"])
-sheet = spreadsheet.worksheet(settings["spreadsheet"]["sheet"])
+spreadsheet = client.open_by_key(s_config["id"])
+sheet = spreadsheet.worksheet(s_config["sheet"])
 
 
 def get_text_color(color):
@@ -128,7 +130,6 @@ class Wheel:
         self.wedges = []
 
         # Setup list of columns to scan
-        s_config = settings["spreadsheet"]
         columns_to_scan = [s_config["primary_column"]]
         if s_config["sub_column"]:
             columns_to_scan.append(s_config["sub_column"])
@@ -303,7 +304,7 @@ class Sorcle(pyglet.window.Window):
         self.sub = None
 
     def handle_win(self, winner):
-        separator = settings["spreadsheet"]["separator"]
+        separator = s_config["separator"]
 
         with open(path.join(w_dir, "winner.txt"), 'w', encoding='utf-8') as f:
             f.write(winner["name"])
@@ -374,11 +375,10 @@ class Sorcle(pyglet.window.Window):
 
     def move_winner(self, winner, reason):
 
-        s_move = settings["move"]
         move_sheet = spreadsheet.worksheet(s_move["sheet"])
 
-        left_col = col_to_int(settings["spreadsheet"]["first_column"])
-        right_col = col_to_int(settings["spreadsheet"]["last_column"])
+        left_col = col_to_int(s_config["first_column"])
+        right_col = col_to_int(s_config["last_column"])
 
         move_rows = []
         for row in winner["rows"]:
@@ -392,6 +392,7 @@ class Sorcle(pyglet.window.Window):
             if reason:
                 row_values.append(reason)
 
+            move_rows.append(row_values)
             sheet.delete_rows(row)
 
         end_col = col_to_str(
@@ -429,7 +430,6 @@ class Sorcle(pyglet.window.Window):
 
                 self.handle_win(self.wheel.selected)
 
-
                 # Delete trigger files to mitigate accidental presses
                 delete_files()
         else:
@@ -438,7 +438,7 @@ class Sorcle(pyglet.window.Window):
                 self.wheel.rotate(0.02)
 
             else:
-                if settings["move"]["enabled"]:
+                if s_move["enabled"]:
                     if pathlib.Path(path.join(w_dir, "move")).is_file():
 
                         with open(pathlib.Path(path.join(w_dir, "move"))) as f:
