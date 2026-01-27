@@ -41,7 +41,7 @@ sheet: String # Sheet name, different from
 column: String # Leftmost column for data on the sheet we're moving to
 row: Integer # Topmost row for data on the sheet we're moving to
 prepend_date: Boolean # Will add a date in the first column
-date_format: String # How to format the date in strftime https://strftime.org/ e.g. "%Y-%m-%d"
+date_format: String # How to format the date in strftime format https://strftime.org/ e.g. "%Y-%m-%d"
 
 [wheel]
 font: String # Font installed in the system
