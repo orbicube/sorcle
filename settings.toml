@@ -22,7 +22,7 @@
 "column" = "B"
 # Topmost row for data on the sheet we're moving to
 "row" = 3
-# Will put a date in the first column
+# Will add a date in the first column
 "prepend_date" = true
 
 

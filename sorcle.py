@@ -388,7 +388,7 @@ class Sorcle(pyglet.window.Window):
 
             row_values = []
             if s_move["prepend_date"]:
-                row_values.append(datetime.today().strftime("%m/%d/%Y"))
+                row_values.append(datetime.today().strftime("%Y-%m-%d %H:%M:%S.%f"))
 
             row_values.extend(
                 sheet.row_values(row)[self.wheel.left_col-1:])
@@ -403,7 +403,8 @@ class Sorcle(pyglet.window.Window):
             col_to_int(s_move['column']) + len(move_rows[0]))
 
         move_sheet.append_rows(move_rows,
-            table_range=f"{s_move['column']}{s_move['row']}:{end_col}9999")
+            table_range=f"{s_move['column']}{s_move['row']}:{end_col}9999",
+            value_input_option=gspread.utils.ValueInputOption.user_entered)
 
 
     def on_draw(self):
