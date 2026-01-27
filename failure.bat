@@ -1,0 +1,1 @@
+echo FAILURE > %~dp0\move

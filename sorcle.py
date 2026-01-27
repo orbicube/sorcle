@@ -6,6 +6,7 @@ from random import choice, randint
 from glob import glob
 import requests
 from datetime import datetime
+import string
 
 from text_fix import ArcadeTextLayoutGroup
 
@@ -23,6 +24,7 @@ import gspread
 client = gspread.service_account(filename=path.join(w_dir, "account.json"))
 spreadsheet = client.open_by_key(settings["spreadsheet"]["id"])
 sheet = spreadsheet.worksheet(settings["spreadsheet"]["sheet"])
+
 
 def get_text_color(color):
     color_intensity = (color[0]*.299 + color[1]*.587 + color[2]*.114)
@@ -50,9 +52,11 @@ def col_to_str(col):
     letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     result = []
     while col:
-        col, rem = divmod(digit-1, 26)
+        col, rem = divmod(col-1, 26)
         result[:0] = letters[rem]
     return ''.join(result)
+
+
 
 class Wedge(pyglet.shapes.Sector):
 
@@ -117,6 +121,9 @@ class Wheel:
         for color in settings["wheel"]["colors"]:
             self.colors.append(tuple(color))
 
+        self.left_col = 0
+        self.right_col = 0
+
         self.import_spreadsheet()
 
 
@@ -132,7 +139,9 @@ class Wheel:
             for c in s_config["extra_columns"]:
                 columns_to_scan.append(c)
 
-        ranges = [f"{s_config['sheet']}!{c}{s_config['row']}:{c}" for c in columns_to_scan]
+        self.left_col, self.right_col = self.col_bounds(columns_to_scan)
+
+        ranges = [f"{c}{s_config['row']}:{c}" for c in columns_to_scan]
         columns = sheet.batch_get(ranges)
 
         # Handle resulting 
@@ -206,13 +215,12 @@ class Wheel:
                 prev_color = color
 
                 self.wedges.append(Wedge(name=wedge["name"], sub=wedge["sub"],
-                    extras=wedge["extras"], start_angle=curr_angle,
+                    extras=wedge["extras"], rows=wedge["rows"], start_angle=curr_angle,
                     angle=angle_per_wedge, color=color, batch=self.batch,
                     wedge_group=self.wedge_group, text_group=self.text_group))
 
             curr_angle += angle_per_wedge
             curr_wedge += 1
-
 
 
     def rotate(self, velocity):
@@ -229,6 +237,19 @@ class Wheel:
                     self.selected["extras"] = wedge.extras
                     self.selected["color"] = wedge.color[:-1]
                     self.selected["rows"] = wedge.rows
+
+
+    def col_bounds(self, cols):
+        lowest = 99999999
+        highest = 0
+        for c in cols:
+            c_int = col_to_int(c)
+            if c_int < lowest:
+                lowest = c_int
+            elif c_int > highest:
+                highest = c_int
+
+        return lowest, highest
 
 
 class Sorcle(pyglet.window.Window):
@@ -359,18 +380,18 @@ class Sorcle(pyglet.window.Window):
 
 
     def move_winner(self, winner, reason):
-
         s_move = settings["move"]
         move_sheet = spreadsheet.worksheet(s_move["sheet"])
 
         move_rows = []
-        for row in winner.rows:
+        for row in winner["rows"]:
 
             row_values = []
             if s_move["prepend_date"]:
                 row_values.append(datetime.today().strftime("%m/%d/%Y"))
 
-            row_values.extend(sheet.row_values(row))
+            row_values.extend(
+                sheet.row_values(row)[self.wheel.left_col-1:])
 
             if reason:
                 row_values.append(reason)
@@ -379,9 +400,10 @@ class Sorcle(pyglet.window.Window):
             sheet.delete_rows(row)
 
         end_col = col_to_str(
-            col_to_int(s_move['start_column']) + len(move_rows[0]))
+            col_to_int(s_move['column']) + len(move_rows[0]))
+
         move_sheet.append_rows(move_rows,
-            table_range=f"{s_move['start_column']}{s_move['row']}:{end_col}9999")
+            table_range=f"{s_move['column']}{s_move['row']}:{end_col}9999")
 
 
     def on_draw(self):
@@ -423,7 +445,7 @@ class Sorcle(pyglet.window.Window):
                     if pathlib.Path(path.join(w_dir, "move")).is_file():
 
                         with open(pathlib.Path(path.join(w_dir, "move"))) as f:
-                            reason = f.read()
+                            reason = f.read().rstrip()
 
                         self.move_winner(self.wheel.selected, reason)
                         os.remove(path.join(w_dir, "move"))
@@ -433,7 +455,7 @@ class Sorcle(pyglet.window.Window):
                             f.write(" ")
 
 
-            elif pathlib.Path(path.join(w_dir, "import")).is_file():
+            if pathlib.Path(path.join(w_dir, "import")).is_file():
                 # Clear winner on re-import
                 if self.winner_label:
                     self.winner_label = None

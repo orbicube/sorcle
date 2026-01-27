@@ -1,0 +1,1 @@
+echo SUCCESS > %~dp0\move
