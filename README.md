@@ -28,6 +28,8 @@ settings.toml is configurable, and you can swap out the sound and graphic files 
 api_key: String # Create one at https://console.cloud.google.com/apis/api/sheets.googleapis.com/
 id: String # found between /d/ and /edit in url of a Google Sheets spreadsheet
 sheet: String # Sheet name, Sheet1 if you haven't renamed one
+first_column: String # Leftmost column, in letter notation
+last_column: String # Rightmost column, in letter notation
 row: Integer # Row number to start from, indexing from 1
 primary_column: String # Column to scan, in letter noation
 sub_column: String # Optional secondary column to display under winner and written to sub.txt
@@ -39,6 +41,7 @@ sheet: String # Sheet name, different from
 column: String # Leftmost column for data on the sheet we're moving to
 row: Integer # Topmost row for data on the sheet we're moving to
 prepend_date: Boolean # Will add a date in the first column
+date_format: String # How to format the date in strftime https://strftime.org/ e.g. "%Y-%m-%d"
 
 [wheel]
 font: String # Font installed in the system
