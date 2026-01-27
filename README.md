@@ -4,17 +4,20 @@ pyglet program to draw a spinning wheel, grabbing a list of names from a public 
 <img width="500" alt="image" src="https://github.com/user-attachments/assets/f6245651-c24d-49a8-9766-cc480d2c0349" />
 
 ## Installation
-Add a [Google API key with Google Sheets enabled](https://console.cloud.google.com/apis/api/sheets.googleapis.com/) to `settings.toml`.
+* Create a new [Google service account](https://console.cloud.google.com/apis/credentials) with Google Sheets and Google Drive API enabled in the organisation.
+* Inside the service account's page, click on the `Keys` tab and then `Add key` -> `Create new key`, selecting JSON.
+* Rename the automatically downloaded JSON file to account.json and put it in the same folder as the .py/.exe file.
+* Find the `client_email` string in account.json, and share the spreadsheet you wish to use with that email. Make sure to give it editor permissions.
 ### Python (3.11+)
 ```
   python -m pip install -r requirements.txt
-  python sorcle.py
 ```
 ### Windows
 Run the standalone .exe from [Releases](https://github.com/orbicube/sorcle/releases/latest).
 ## Usage
 * To spin the wheel, create a file called "spin" in the directory.
 * To re-import your list, create a file called "import" in the directory.
+* After the wheel has finish spinning, you can create a file called "move" to move the
 * For Windows users there are .bat files to trigger these with a Stream Deck or similar application.
 
 ## Configuration
@@ -26,9 +29,16 @@ api_key: String # Create one at https://console.cloud.google.com/apis/api/sheets
 id: String # found between /d/ and /edit in url of a Google Sheets spreadsheet
 sheet: String # Sheet name, Sheet1 if you haven't renamed one
 row: Integer # Row number to start from, indexing from 1
-column: String # Column to scan, in letter noation
+primary_column: String # Column to scan, in letter noation
 sub_column: String # Optional secondary column to display under winner and written to sub.txt
 extra_columns: Array # Optional extra columns written to files extra1.txt, extra2.txt, etc.
+
+[move]
+enabled: Boolean # If true, will move columns into another sheet when "move" file is detected
+sheet: String # Sheet name, different from
+column: String # Leftmost column for data on the sheet we're moving to
+row: Integer # Topmost row for data on the sheet we're moving to
+prepend_date: Boolean # Will add a date in the first column
 
 [wheel]
 font: String # Font installed in the system
