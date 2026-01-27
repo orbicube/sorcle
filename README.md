@@ -17,7 +17,7 @@ Run the standalone .exe from [Releases](https://github.com/orbicube/sorcle/relea
 ## Usage
 * To spin the wheel, create a file called "spin" in the directory.
 * To re-import your list, create a file called "import" in the directory.
-* After the wheel has finish spinning, you can create a file called "move" to move the
+* After the wheel has finish spinning, you can create a file called "move" to move the winner to another sheet. Any text inside "move" will be added as an additional column.
 * For Windows users there are .bat files to trigger these with a Stream Deck or similar application.
 
 ## Configuration
