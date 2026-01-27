@@ -155,13 +155,13 @@ class Wheel:
         temp_wedges = []
         for row in rows:
             if row:
-                try: sub = sub_rows[rows.index(row)][0]
+                try: sub = sub_rows[len(temp_wedges)][0]
                 except: sub = ""
-                try: extras = [x[rows.index(row)][0] for x in extra_rows]
+                try: extras = [x[len(temp_wedges)][0] for x in extra_rows]
                 except: extras = []
 
                 wedge_dict = {
-                    "name": row[0], "sub": sub, "extras": extras,
+                    "name": row[0], "sub": [sub], "extras": [extras],
                     "rows": [len(temp_wedges) + s_config["row"]]}
 
                 prev_wedges = [w["name"] for w in temp_wedges]
@@ -194,6 +194,10 @@ class Wheel:
                             dupe_wedge = True
                             self.wedges[-1].angle += angle_per_wedge
                             self.wedges[-1].label.rotation -= (angle_per_wedge / 2)
+                            if wedge["sub"][0] not in self.wedges[-1].sub:
+                                self.wedges[-1].sub.extend(wedge["sub"])
+
+                            self.wedges[-1].extras.extend(wedge["extras"])
                             self.wedges[-1].rows.extend(wedge["rows"])
 
             if not dupe_wedge:
@@ -298,14 +302,15 @@ class Sorcle(pyglet.window.Window):
         self.winner_bg = None
         self.sub = None
 
-
     def handle_win(self, winner):
+        separator = settings["spreadsheet"]["separator"]
+
         with open(path.join(w_dir, "winner.txt"), 'w', encoding='utf-8') as f:
             f.write(winner["name"])
 
         if winner["sub"]:
             with open(path.join(w_dir, "sub.txt"), 'w', encoding='utf-8') as f:
-                f.write(winner["sub"])
+                f.write(separator.join(winner["sub"]))
         else:
             with open(path.join(w_dir, "sub.txt"), 'w', encoding='utf-8') as f:
                 f.write("")
@@ -315,11 +320,15 @@ class Sorcle(pyglet.window.Window):
             with open(file, 'w') as f:
                 f.write("")
         if winner["extras"]:
-            ex_count = 1
-            for column in winner["extras"]:
+            new_matrix = []
+            for i in range(0, len(winner["extras"][0])):
+                new_matrix.append([row[i] for row in winner["extras"]])
+
+            for ex_count, col in enumerate(new_matrix, start=1):
+                col = list(dict.fromkeys(col))
+
                 with open(path.join(w_dir, f"extra{ex_count}.txt"), 'w', encoding='utf-8') as f:
-                    f.write(column)
-                ex_count += 1
+                    f.write(separator.join(col))
 
         if not settings["wheel"]["suppress_win"]:
             finished = pyglet.media.load(
@@ -343,7 +352,7 @@ class Sorcle(pyglet.window.Window):
                 group=self.background_group, batch=self.batch)
 
             if winner["sub"]:
-                self.sub = pyglet.text.Label(winner["sub"],
+                self.sub = pyglet.text.Label("\n\n".join(winner["sub"]),
                     font_name=settings["wheel"]["font"], font_size=32,
                     width=900, multiline=True,
                     x=500, y=500-(self.winner_label.content_height//2)-25,
@@ -362,6 +371,7 @@ class Sorcle(pyglet.window.Window):
 
 
     def move_winner(self, winner, reason):
+
         s_move = settings["move"]
         move_sheet = spreadsheet.worksheet(s_move["sheet"])
 
@@ -370,7 +380,6 @@ class Sorcle(pyglet.window.Window):
 
         move_rows = []
         for row in winner["rows"]:
-
             row_values = []
             if s_move["prepend_date"]:
                 row_values.append(datetime.today().strftime(s_move["date_format"]))
@@ -381,7 +390,6 @@ class Sorcle(pyglet.window.Window):
             if reason:
                 row_values.append(reason)
 
-            move_rows.append(row_values)
             sheet.delete_rows(row)
 
         end_col = col_to_str(
@@ -419,6 +427,7 @@ class Sorcle(pyglet.window.Window):
 
                 self.handle_win(self.wheel.selected)
 
+
                 # Delete trigger files to mitigate accidental presses
                 delete_files()
         else:
@@ -436,9 +445,11 @@ class Sorcle(pyglet.window.Window):
                         self.move_winner(self.wheel.selected, reason)
                         os.remove(path.join(w_dir, "move"))
 
-                        # Create an import file to refresh the wheel
-                        with open(pathlib.Path(path.join(w_dir, "import")), "w") as f:
-                            f.write(" ")
+                        self.row_count += 1
+                        if self.row_count == len(self.wheel.selected['rows']):
+                            # Create an import file to refresh the wheel
+                            with open(pathlib.Path(path.join(w_dir, "import")), "w") as f:
+                                f.write(" ")
 
 
             if pathlib.Path(path.join(w_dir, "import")).is_file():
