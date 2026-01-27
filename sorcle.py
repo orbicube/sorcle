@@ -320,11 +320,13 @@ class Sorcle(pyglet.window.Window):
             with open(file, 'w') as f:
                 f.write("")
         if winner["extras"]:
+            # Turn rows[columns[]] into columns[rows[]]
             new_matrix = []
             for i in range(0, len(winner["extras"][0])):
                 new_matrix.append([row[i] for row in winner["extras"]])
 
             for ex_count, col in enumerate(new_matrix, start=1):
+                # Remove duplicates
                 col = list(dict.fromkeys(col))
 
                 with open(path.join(w_dir, f"extra{ex_count}.txt"), 'w', encoding='utf-8') as f:
