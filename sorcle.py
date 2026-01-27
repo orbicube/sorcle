@@ -447,11 +447,9 @@ class Sorcle(pyglet.window.Window):
                         self.move_winner(self.wheel.selected, reason)
                         os.remove(path.join(w_dir, "move"))
 
-                        self.row_count += 1
-                        if self.row_count == len(self.wheel.selected['rows']):
-                            # Create an import file to refresh the wheel
-                            with open(pathlib.Path(path.join(w_dir, "import")), "w") as f:
-                                f.write(" ")
+                        # Create an import file to refresh the wheel
+                        with open(pathlib.Path(path.join(w_dir, "import")), "w") as f:
+                            f.write(" ")
 
 
             if pathlib.Path(path.join(w_dir, "import")).is_file():
