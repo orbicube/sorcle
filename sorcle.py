@@ -214,8 +214,6 @@ class Wheel:
 
                 color = choice(valid_colors)
 
-                print(w["rows"])
-
                 self.wedges.append(Wedge(name=w["name"],
                     sub=w["sub"], extras=w["extras"], rows=w["rows"],
                     start_angle=curr_angle, angle=wedge_angle, color=color,
@@ -303,8 +301,6 @@ class Sorcle(pyglet.window.Window):
 
     def handle_win(self, winner):
         separator = s_config["separator"]
-
-        print(winner.rows)
 
         if s_wheel["append_key"] and winner.key != winner.name:
             key = winner.key.rsplit('/', 1)[1]
