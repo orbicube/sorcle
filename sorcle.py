@@ -21,6 +21,7 @@ with open(path.join(w_dir, "settings.toml"), "rb") as f:
     settings = tomllib.load(f)
 s_move = settings["move"]
 s_config = settings["spreadsheet"]
+s_wheel = settings["wheel"]
 
 import gspread
 client = gspread.service_account(filename=path.join(w_dir, "account.json"))
@@ -62,9 +63,9 @@ def col_to_str(col):
 
 class Wedge(pyglet.shapes.Sector):
 
-    def __init__(self, name, sub, extras, rows, 
-        start_angle, angle, color, 
-        wedge_group, text_group, batch):
+    def __init__(self, name, sub, extras, rows, key,
+        start_angle, angle, color, wedge_group, text_group, batch):
+
         super().__init__(x = 500, y = 500, radius=495,
             start_angle = start_angle, angle = angle, color = color,
             group = wedge_group, batch=batch)
@@ -73,6 +74,7 @@ class Wedge(pyglet.shapes.Sector):
         self.sub = sub
         self.extras = extras
         self.rows = rows
+        self.key = key
 
         # Trim name if too long
         if len(name) > 23:
@@ -110,8 +112,7 @@ class Wheel:
         self.spinning = False
         self.finished = False
         self.idle = True
-        self.selected = {"name": "", "sub": "", "extras": [],
-            "color": (0,0,0,0)}
+        self.selected = None
 
         self.batch = batch
         self.wedge_group = pyglet.graphics.Group(order=0)
@@ -137,6 +138,11 @@ class Wheel:
             for c in s_config["extra_columns"]:
                 columns_to_scan.append(c)
 
+        if s_config["primary_column"] != s_config["key_column"]:
+            columns_to_scan.append(s_config["key_column"])
+            use_key = True
+        else: use_key = False
+
         ranges = [f"{c}{s_config['row']}:{c}" for c in columns_to_scan]
         columns = sheet.batch_get(ranges)
 
@@ -151,76 +157,72 @@ class Wheel:
             for c in s_config["extra_columns"]:
                 extra_rows.append(columns[0])
                 columns.pop(0)
+        if use_key:
+            keys = columns[0]
 
         # Grab all values, filter out empty and handle dupe logic
-        temp_wedges = []
-        for row in rows:
+        wedge_dict = {}
+        for i, row in enumerate(rows):
             if row:
-                try: sub = sub_rows[len(temp_wedges)][0]
+                if use_key:
+                    key = f"{row[0]}/{keys[i][0]}"
+                else:
+                    key = row[0]
+
+                try: sub = sub_rows[i][0]
                 except: sub = ""
-                try: extras = [x[len(temp_wedges)][0] for x in extra_rows]
+                try: extras = [x[i][0] for x in extra_rows]
                 except: extras = []
 
-                wedge_dict = {
-                    "name": row[0], "sub": [sub], "extras": [extras],
-                    "rows": [len(temp_wedges) + s_config["row"]]}
-
-                prev_wedges = [w["name"] for w in temp_wedges]
-                # Filter out dupe games if setting is true
-                if settings["wheel"]["remove_dupes"]:
-                    if row[0] not in prev_wedges:
-                        temp_wedges.append(wedge_dict)
-                # Otherwise, put the dupes next to each other to combine later
-                else:
-                    if row[0] in prev_wedges and settings["wheel"]["combine_dupes"]:
-                        temp_wedges.insert(prev_wedges.index(row[0]),
-                            wedge_dict)
-                    else:
-                        temp_wedges.append(wedge_dict)
+                if not (s_wheel["remove_dupes"] and key in wedge_dict):
+                    wedge_dict.setdefault(key, [])
+                    wedge_dict[key].append({"name": row[0], "sub": [sub],
+                        "extras": [extras], "rows": [s_config["row"] + i],
+                        "key": key})
 
         # Calculate angle for wedges
-        wedge_num = len(temp_wedges)
+        wedge_num = sum(len(w) for w in wedge_dict.values())
         angle_per_wedge = 360 / wedge_num
 
         curr_angle = 0.0
-        curr_wedge = 0
-        prev_color = (0,0,0)
-        for wedge in temp_wedges:
+        color = (0,0,0)
 
-            dupe_wedge = False
-            if not settings["wheel"]["remove_dupes"]:
-                if settings["wheel"]["combine_dupes"]:
-                    if curr_wedge > 0:
-                        if wedge["name"] == self.wedges[-1].name:
-                            dupe_wedge = True
-                            self.wedges[-1].angle += angle_per_wedge
-                            self.wedges[-1].label.rotation -= (angle_per_wedge / 2)
-                            if wedge["sub"][0] not in self.wedges[-1].sub:
-                                self.wedges[-1].sub.extend(wedge["sub"])
+        for i, v in enumerate(wedge_dict.values()):
 
-                            self.wedges[-1].extras.extend(wedge["extras"])
-                            self.wedges[-1].rows.extend(wedge["rows"])
+            valid_colors = self.colors[:]
 
-            if not dupe_wedge:
-                # Ensure no color dupes, can't do random.sample() unfortunately
-                # list[:] copies
+            if len(v) > 1 and s_wheel["combine_dupes"]:
+                for j in range(1, len(v)):
+
+                    if v[j]["sub"][0] not in v[0]["sub"]:
+                        v[0]["sub"].extend(v[j]["sub"])
+                    v[0]["extras"].extend(v[j]["extras"])
+                    v[0]["rows"].extend(v[j]["rows"])
+
+                v = [v[0]]
+
+            for w in v:
+                wedge_angle = len(w["rows"]) * angle_per_wedge
+
                 valid_colors = self.colors[:]
-                if curr_wedge > 0:
-                    valid_colors.remove(prev_color)
-                # Make sure first and last aren't the same
-                if curr_wedge == wedge_num-1 and self.wedges[0].color[:-1] != prev_color:
-                    if len(valid_colors) > 1:
+                if i > 0:
+                    valid_colors.remove(color)
+                    if (curr_angle + wedge_angle == 360
+                        and self.wedges[0].color[:-1] != color
+                        and len(valid_colors) > 1):
                         valid_colors.remove(self.wedges[0].color[:-1])
+
                 color = choice(valid_colors)
-                prev_color = color
 
-                self.wedges.append(Wedge(name=wedge["name"], sub=wedge["sub"],
-                    extras=wedge["extras"], rows=wedge["rows"], start_angle=curr_angle,
-                    angle=angle_per_wedge, color=color, batch=self.batch,
-                    wedge_group=self.wedge_group, text_group=self.text_group))
+                print(w["rows"])
 
-            curr_angle += angle_per_wedge
-            curr_wedge += 1
+                self.wedges.append(Wedge(name=w["name"],
+                    sub=w["sub"], extras=w["extras"], rows=w["rows"],
+                    start_angle=curr_angle, angle=wedge_angle, color=color,
+                    wedge_group=self.wedge_group, text_group=self.text_group,
+                    batch=self.batch, key=w["key"]))
+
+                curr_angle += wedge_angle
 
 
     def rotate(self, velocity):
@@ -231,12 +233,8 @@ class Wheel:
         for wedge in self.wedges:
             is_selected = wedge.rotate(velocity)
             if self.spinning and is_selected:
-                if self.selected["name"] != wedge.name:
-                    self.selected["name"] = wedge.name
-                    self.selected["sub"] = wedge.sub
-                    self.selected["extras"] = wedge.extras
-                    self.selected["color"] = wedge.color[:-1]
-                    self.selected["rows"] = wedge.rows
+                if self.selected != wedge:
+                    self.selected = wedge
 
 
 class Sorcle(pyglet.window.Window):
@@ -306,12 +304,22 @@ class Sorcle(pyglet.window.Window):
     def handle_win(self, winner):
         separator = s_config["separator"]
 
-        with open(path.join(w_dir, "winner.txt"), 'w', encoding='utf-8') as f:
-            f.write(winner["name"])
+        print(winner.rows)
 
-        if winner["sub"]:
+        if s_wheel["append_key"] and winner.key != winner.name:
+            key = winner.key.rsplit('/', 1)[1]
+        else:
+            key = ""
+        
+        with open(path.join(w_dir, "winner.txt"), 'w', encoding='utf-8') as f:
+            if key:
+                f.write(f"{winner.name} ({key})")
+            else:
+                f.write(winner.name)
+
+        if winner.sub:
             with open(path.join(w_dir, "sub.txt"), 'w', encoding='utf-8') as f:
-                f.write(separator.join(winner["sub"]))
+                f.write(separator.join(winner.sub))
         else:
             with open(path.join(w_dir, "sub.txt"), 'w', encoding='utf-8') as f:
                 f.write("")
@@ -320,11 +328,11 @@ class Sorcle(pyglet.window.Window):
         for file in extra_files:
             with open(file, 'w') as f:
                 f.write("")
-        if winner["extras"]:
+        if winner.extras:
             # Turn rows[columns[]] into columns[rows[]]
             new_matrix = []
-            for i in range(0, len(winner["extras"][0])):
-                new_matrix.append([row[i] for row in winner["extras"]])
+            for i in range(0, len(winner.extras[0])):
+                new_matrix.append([row[i] for row in winner.extras])
 
             for ex_count, col in enumerate(new_matrix, start=1):
                 # Remove duplicates
@@ -333,35 +341,38 @@ class Sorcle(pyglet.window.Window):
                 with open(path.join(w_dir, f"extra{ex_count}.txt"), 'w', encoding='utf-8') as f:
                     f.write(separator.join(col))
 
-        if not settings["wheel"]["suppress_win"]:
+        if not s_wheel["suppress_win"]:
             finished = pyglet.media.load(
                 path.join(w_dir, settings["finished"]["file"]))
             finished.play().volume = settings["finished"]["volume"]
 
             # Print winner name
-            self.winner_label = pyglet.text.Label(winner["name"],
-                font_name=settings["wheel"]["font"], font_size=64, 
+            self.winner_label = pyglet.text.Label(winner.name,
+                font_name=s_wheel["font"], font_size=64, 
                 width=900, multiline=True, x=500, y=500, 
-                color=get_text_color(winner["color"]),
+                color=get_text_color(winner.color),
                 anchor_x='center', anchor_y='center', align='center',
                 group=self.winner_group, batch=self.batch)
 
-            self.winner_bg = pyglet.shapes.Rectangle(
+            self.winner_bg = pyglet.shapes.BorderedRectangle(
                 x=500-(self.winner_label.content_width//2)-25,
                 y=500-(self.winner_label.content_height//2)-25,
                 width=self.winner_label.content_width+50,
                 height=self.winner_label.content_height+50,
-                color=winner["color"],
+                color=winner.color, border_color=get_text_color(winner.color),
                 group=self.background_group, batch=self.batch)
 
-            if winner["sub"]:
-                self.sub = pyglet.text.Label("\n\n".join(winner["sub"]),
+            if winner.sub:
+                self.sub = pyglet.text.Label("\n\n".join(winner.sub),
                     font_name=settings["wheel"]["font"], font_size=32,
                     width=900, multiline=True,
                     x=500, y=500-(self.winner_label.content_height//2)-25,
-                    color=get_text_color(winner["color"]),
+                    color=get_text_color(winner.color),
                     anchor_x='center', anchor_y='top', align='center',
                     group=self.winner_group, batch=self.batch)
+
+                if key:
+                    self.sub.text = f"{key}\n\n" + self.sub.text
 
                 if self.sub.content_width > self.winner_label.content_width:
                     self.winner_bg.width = self.sub.content_width+50
@@ -381,19 +392,21 @@ class Sorcle(pyglet.window.Window):
         right_col = col_to_int(s_config["last_column"])
 
         move_rows = []
-        for row in winner["rows"]:
+        for i, row in enumerate(winner.rows):
+
             row_values = []
             if s_move["prepend_date"]:
                 row_values.append(datetime.today().strftime(s_move["date_format"]))
 
             row_values.extend(
-                sheet.row_values(row)[left_col-1:right_col])
+                sheet.row_values(row - i)[left_col-1:right_col])
 
             if reason:
                 row_values.append(reason)
 
             move_rows.append(row_values)
-            sheet.delete_rows(row)
+
+            sheet.delete_rows(row - i)
 
         end_col = col_to_str(
             col_to_int(s_move['column']) + len(move_rows[0]))
@@ -408,9 +421,10 @@ class Sorcle(pyglet.window.Window):
 
         if self.wheel.spinning:
             # If new wedge at pointer, play sound
-            old_name = self.wheel.selected["name"]
+            try: old_name = self.wheel.selected.name
+            except: old_name = ""
             self.wheel.rotate(self.velocity)
-            if old_name != self.wheel.selected["name"]:
+            if old_name != self.wheel.selected.name:
                 # Play sound if there isn't one, stopped or has been 33ms
                 if not self.player:
                     self.player = self.sound.play()

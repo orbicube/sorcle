@@ -1,36 +1,39 @@
 [spreadsheet]
 # found between /d/ and /edit in url of a Google Sheets spreadsheet
-"id" = "14f2IPkBaMliBQk7R9JWyQUCPs6u47kmug4BUyelVN7U"
-"sheet" = "Queue"
+id = "14f2IPkBaMliBQk7R9JWyQUCPs6u47kmug4BUyelVN7U"
+sheet = "Queue"
 # Left and right bound columns
-"first_column" = "B"
-"last_column" = "E"
+first_column = "B"
+last_column = "E"
 # Row number to start from, indexing from 1
-"row" = 3
+row = 3
 # Primary column. Written to winner.txt
-"primary_column" = "C"
+primary_column = "C"
+# Column to use to avoid unwanted duplicate detection
+# Set to same value as primary_column if not using
+key_column = "B"
 # Optional secondary column to display under winner and written to sub.txt
 # Leave as "" if not required
-"sub_column" = "D" 
+sub_column = "D" 
 # Extra columns, only written to files (extra1.txt, extra2.txt, ...)
 # Leave as [] if not required
-"extra_columns" = ["E", "B"]
+extra_columns = ["E", "B"]
 # Separator to use when writing multiple entries to file
-"separator" = "\n"
+separator = "\n"
 
 [move]
 # If true, will move columns into another sheet
 # Triggers on detection of "move" file with text within being added as a column
-"enabled" = true
-"sheet" = "History (2026)"
+enabled = true
+sheet = "History (2026)"
 # Leftmost column for data on the sheet we're moving to
-"column" = "B"
+column = "B"
 # Topmost row for data on the sheet we're moving to
-"row" = 3
+row = 3
 # Will add a date in the first column
-"prepend_date" = true
+prepend_date = true
 # How to format the date in strftime formatting https://strftime.org/
-"date_format" = "%Y-%m-%d"
+date_format = "%Y-%m-%d"
 
 
 [wheel]
@@ -51,6 +54,8 @@ colors = [ # RGB arrays of colors to use for wedges; font colour will change to 
 remove_dupes = false
 # If above is false, then this option will combine dupe wedges into a single, bigger wedge
 combine_dupes = true
+# If enabled and key was used, will append the key to the winner name (in parentheses)
+append_key = true
 # Suppress winner notification if handling visuals elsewhere
 suppress_win = false
 # How fast the wheel decelerates; bigger number is faster (1.0 = -1% of current speed per tick)
@@ -59,26 +64,26 @@ decel_rate = 1.0
 
 [pointer] # Image that points to the result of the wheel
 # Can be animated GIF or any other arbitrary image type
-"file" = "pointer.png"
-"scale" = 1.0
+file = "pointer.png"
+scale = 1.0
 # Position on screen, adjustable for different images
-"x_pos" = 1015
-"y_pos" = 500
+x_pos = 1015
+y_pos = 500
 
 [center] # Image placed in the center of the wheel
 # Can be animated GIF or any other arbitrary image type
-"file" = "center.gif"
-"scale" = 6.0
+file = "center.gif"
+scale = 6.0
  # Rotate with the wheel
-"rotate" = true
+rotate = true
 
 [tick] # Sound played when pointer 'hits' wedge
-"file" = "tick.wav" # WAV only
-"volume" = 1.0
+file = "tick.wav" # WAV only
+volume = 1.0
 
 [finished] # Sound played when wheel finishes spinning
-"file" = "finished.wav" # WAV only
-"volume" = 1.0
+file = "finished.wav" # WAV only
+volume = 1.0
 
 
 [window]
