@@ -189,8 +189,7 @@ class Wheel:
 
         for i, v in enumerate(wedge_dict.values()):
 
-            valid_colors = self.colors[:]
-
+            # If we're combining wedges, move everything into first wedge
             if len(v) > 1 and s_wheel["combine_dupes"]:
                 for j in range(1, len(v)):
 
@@ -204,6 +203,7 @@ class Wheel:
             for w in v:
                 wedge_angle = len(w["rows"]) * angle_per_wedge
 
+                # Make sure colors don't repeat
                 valid_colors = self.colors[:]
                 if i > 0:
                     valid_colors.remove(color)
