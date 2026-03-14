@@ -1,6 +1,6 @@
 [spreadsheet]
 # found between /d/ and /edit in url of a Google Sheets spreadsheet
-id = "14f2IPkBaMliBQk7R9JWyQUCPs6u47kmug4BUyelVN7U"
+id = "1Kzyx6KkDOTP80XItdwAQEIoBxGXnka8PxLMJQQEDKC4" #14f2IPkBaMliBQk7R9JWyQUCPs6u47kmug4BUyelVN7U
 sheet = "Queue"
 # Left and right bound columns
 first_column = "B"
@@ -8,7 +8,7 @@ last_column = "E"
 # Row number to start from, indexing from 1
 start_row = 3
 # Number of rows to include after start_row
-max_rows = 9999
+max_rows = 999
 # Primary column. Written to winner.txt
 primary_column = "C"
 # Column to use to avoid unwanted duplicate detection
@@ -36,6 +36,8 @@ row = 3
 prepend_date = true
 # How to format the date in strftime formatting https://strftime.org/
 date_format = "%Y-%m-%d"
+# Whether to decrement max_rows upon moving
+cut_max = false
 
 
 [wheel]
@@ -56,6 +58,8 @@ colors = [ # RGB arrays of colors to use for wedges; font colour will change to 
 remove_dupes = false
 # If above is false, then this option will combine dupe wedges into a single, bigger wedge
 combine_dupes = true
+# Whether to combine duplicate sub_column in winner message
+combine_subs = false
 # If enabled and key was used, will append the key to the winner name (in parentheses)
 append_key = true
 # Suppress winner notification if handling visuals elsewhere

@@ -144,9 +144,9 @@ class Wheel:
         else: use_key = False
 
         start_row = s_config["start_row"]
-        max_rows = s_config["max_rows"] + start_row
+        max_row = s_config["max_rows"]-1 + start_row
 
-        ranges = [f"{c}{start_row}:{c}{max_rows}"
+        ranges = [f"{c}{start_row}:{c}{max_row}"
             for c in columns_to_scan]
         columns = sheet.batch_get(ranges)
 
@@ -197,8 +197,12 @@ class Wheel:
             if len(v) > 1 and s_wheel["combine_dupes"]:
                 for j in range(1, len(v)):
 
-                    if v[j]["sub"][0] not in v[0]["sub"]:
+                    if s_wheel["combine_subs"]:
+                        if v[j]["sub"][0] not in v[0]["sub"]:
+                            v[0]["sub"].extend(v[j]["sub"])
+                    else:
                         v[0]["sub"].extend(v[j]["sub"])
+                        
                     v[0]["extras"].extend(v[j]["extras"])
                     v[0]["rows"].extend(v[j]["rows"])
 
@@ -414,6 +418,9 @@ class Sorcle(pyglet.window.Window):
         move_sheet.append_rows(move_rows,
             table_range=f"{s_move['column']}{s_move['row']}:{end_col}9999",
             value_input_option=gspread.utils.ValueInputOption.user_entered)
+
+        if s_move["cut_max"]:
+            s_config["max_rows"] -= len(winner.rows)
 
 
     def on_draw(self):
