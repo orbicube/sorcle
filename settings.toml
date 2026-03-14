@@ -6,7 +6,9 @@ sheet = "Queue"
 first_column = "B"
 last_column = "E"
 # Row number to start from, indexing from 1
-row = 3
+start_row = 3
+# Number of rows to include after start_row
+max_rows = 9999
 # Primary column. Written to winner.txt
 primary_column = "C"
 # Column to use to avoid unwanted duplicate detection

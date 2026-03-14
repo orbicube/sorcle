@@ -143,7 +143,11 @@ class Wheel:
             use_key = True
         else: use_key = False
 
-        ranges = [f"{c}{s_config['row']}:{c}" for c in columns_to_scan]
+        start_row = s_config["start_row"]
+        max_rows = s_config["max_rows"] + start_row
+
+        ranges = [f"{c}{start_row}:{c}{max_rows}"
+            for c in columns_to_scan]
         columns = sheet.batch_get(ranges)
 
         # Handle resulting 
@@ -177,7 +181,7 @@ class Wheel:
                 if not (s_wheel["remove_dupes"] and key in wedge_dict):
                     wedge_dict.setdefault(key, [])
                     wedge_dict[key].append({"name": row[0], "sub": [sub],
-                        "extras": [extras], "rows": [s_config["row"] + i],
+                        "extras": [extras], "rows": [start_row + i],
                         "key": key})
 
         # Calculate angle for wedges
