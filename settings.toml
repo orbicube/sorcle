@@ -59,7 +59,7 @@ remove_dupes = false
 # If above is false, then this option will combine dupe wedges into a single, bigger wedge
 combine_dupes = true
 # Whether to combine duplicate sub_column in winner message
-combine_subs = false
+combine_subs = true
 # If enabled and key was used, will append the key to the winner name (in parentheses)
 append_key = true
 # Suppress winner notification if handling visuals elsewhere
