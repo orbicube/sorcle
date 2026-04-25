@@ -22,6 +22,7 @@ with open(path.join(w_dir, "settings.toml"), "rb") as f:
 s_move = settings["move"]
 s_config = settings["spreadsheet"]
 s_wheel = settings["wheel"]
+s_window = settings["window"]
 
 import gspread
 client = gspread.service_account(filename=path.join(w_dir, "account.json"))
@@ -246,8 +247,10 @@ class Wheel:
 class Sorcle(pyglet.window.Window):
 
     def __init__(self, config):
-        super().__init__(width = 1200, height = 1000, caption = "sorcle",
-            config = config, style='transparent')
+
+        super().__init__(width = 1200, height = 1000, 
+            caption = "sorcle", config = config,
+            style=f"{'transparent' if s_window['transparent'] else 'dialog'}")
 
         pyglet.text.layout.TextLayout.group_class = ArcadeTextLayoutGroup
 
@@ -255,7 +258,7 @@ class Sorcle(pyglet.window.Window):
         self.set_icon(icon)
 
         # For crisp pixel scaling
-        if settings["window"]["nearest_neighbour"]:
+        if s_window["nearest_neighbour"]:
             pyglet.image.Texture.default_mag_filter = pyglet.gl.GL_NEAREST
             pyglet.image.Texture.default_min_filter = pyglet.gl.GL_NEAREST
 
@@ -508,6 +511,13 @@ delete_files()
 config = pyglet.gl.Config()
 config.sample_buffers = 1
 config.samples = 8
+
 window = Sorcle(config)
+
+if not s_window["transparent"]:
+    pyglet.gl.glClearColor(
+        s_window["bg_color"][0],
+        s_window["bg_color"][1],
+        s_window["bg_color"][2], 1)
 
 pyglet.app.run()

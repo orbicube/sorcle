@@ -95,4 +95,8 @@ volume = 1.0
 [window]
 # Whether to use nearest neighbour scaling for pixel art sprites
 nearest_neighbour = true
+# Whether the window should be transparent
+transparent = false
+# If above is false, the color to use
+bg_color = [255, 0, 255]
 
