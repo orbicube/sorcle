@@ -1,6 +1,6 @@
 [spreadsheet]
 # found between /d/ and /edit in url of a Google Sheets spreadsheet
-id = "1Kzyx6KkDOTP80XItdwAQEIoBxGXnka8PxLMJQQEDKC4" #14f2IPkBaMliBQk7R9JWyQUCPs6u47kmug4BUyelVN7U
+id = "14f2IPkBaMliBQk7R9JWyQUCPs6u47kmug4BUyelVN7U"
 sheet = "Queue"
 # Left and right bound columns
 first_column = "B"
@@ -66,7 +66,8 @@ append_key = true
 suppress_win = false
 # How fast the wheel decelerates; bigger number is faster (1.0 = -1% of current speed per tick)
 decel_rate = 1.0
-
+# Minimum and maximum speeds for the wheel to spin.
+speed_range = [25, 100]
 
 [pointer] # Image that points to the result of the wheel
 # Can be animated GIF or any other arbitrary image type

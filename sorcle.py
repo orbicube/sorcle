@@ -265,8 +265,6 @@ class Sorcle(pyglet.window.Window):
         #self.fps_display = pyglet.window.FPSDisplay(self)
         self.batch = pyglet.graphics.Batch()
 
-        self.initial_velocity = 25
-
         self.sprite_group = pyglet.graphics.Group(order=3)
         if settings["center"]["file"].rsplit(".")[1] == "gif":
             center = pyglet.resource.animation(settings["center"]["file"])
@@ -499,7 +497,10 @@ class Sorcle(pyglet.window.Window):
                 self.wheel.spinning = True
                 self.wheel.idle = False
                 # Random spin duration
-                self.velocity = self.initial_velocity + randint(25,100)
+                self.velocity = randint(
+                    s_wheel["speed_range"][0] * 100,
+                    s_wheel["speed_range"][1] * 100) / 100.0
+                
                 os.remove(path.join(w_dir, "spin"))       
 
         #self.fps_display.draw()
