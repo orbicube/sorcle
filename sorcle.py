@@ -308,6 +308,8 @@ class Sorcle(pyglet.window.Window):
         self.winner_bg = None
         self.sub = None
 
+        self.decel = 0
+
     def handle_win(self, winner):
         separator = s_config["separator"]
 
@@ -444,8 +446,13 @@ class Sorcle(pyglet.window.Window):
             if self.velocity < 0.003:
                 self.velocity -= 0.003
             else:
-                self.velocity -= self.velocity * (
-                    (settings["wheel"]["decel_rate"]) / 100)
+
+                if s_wheel["decel_change"]:
+                    decel = randint(
+                        s_wheel["decel_rate"][0] * 100,
+                        s_wheel["decel_rate"][1] * 100) / 100
+
+                self.velocity -= self.velocity * (self.decel / 100)
 
             if self.velocity < 0:
                 self.wheel.spinning = False
@@ -500,7 +507,12 @@ class Sorcle(pyglet.window.Window):
                 self.velocity = randint(
                     s_wheel["speed_range"][0] * 100,
                     s_wheel["speed_range"][1] * 100) / 100.0
-                
+
+                self.decel = randint(
+                    s_wheel["decel_rate"][0] * 100,
+                    s_wheel["decel_rate"][1] * 100) / 100
+                print(self.decel)
+
                 os.remove(path.join(w_dir, "spin"))       
 
         #self.fps_display.draw()

@@ -64,9 +64,11 @@ combine_subs = true
 append_key = true
 # Suppress winner notification if handling visuals elsewhere
 suppress_win = false
-# How fast the wheel decelerates; bigger number is faster (1.0 = -1% of current speed per tick)
-decel_rate = 1.0
-# Minimum and maximum speeds for the wheel to spin.
+# Minimum and maximum deceleration rate; bigger number is faster (1.0 = -1% of current speed per tick)
+decel_rate = [1.0, 1.0]
+# Whether the deceleration rate should change every tick, or be static per-spin
+decel_change = false
+# Minimum and maximum speeds for the wheel to spin
 speed_range = [25, 100]
 
 [pointer] # Image that points to the result of the wheel
