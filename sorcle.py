@@ -8,6 +8,8 @@ import requests
 from datetime import datetime
 import string
 
+from itertools import chain, zip_longest
+
 from text_fix import ArcadeTextLayoutGroup
 
 if getattr(sys, 'frozen', False):
@@ -139,7 +141,7 @@ class Wheel:
             for c in s_config["extra_columns"]:
                 columns_to_scan.append(c)
 
-        if s_config["primary_column"] != s_config["key_column"]:
+        if s_config["key_column"] and s_config["primary_column"] != s_config["key_column"]:
             columns_to_scan.append(s_config["key_column"])
             use_key = True
         else: use_key = False
@@ -178,8 +180,12 @@ class Wheel:
             if row:
                 if use_key:
                     key = f"{row[0]}/{keys[i][0]}"
+                elif not s_wheel["combine_dupes"]:
+                    key = f"{row[0]}/{i}"
                 else:
-                    key = row[0]
+                    key = f"{row[0]}"
+
+                print(key)
 
                 try: sub = sub_rows[i][0]
                 except: sub = ""
@@ -194,20 +200,21 @@ class Wheel:
 
         # Calculate angle for wedges
         wedge_vals = wedge_dict.values()
+
+        print(wedge_vals)
         wedge_num = sum(len(w) for w in wedge_vals)
         angle_per_wedge = 360 / wedge_num
 
         curr_angle = 0.0
         color = (0,0,0)
-
+        
         # Option to combine the two halves of the list alternating
         if s_wheel["interleave"]:
-            inter_wedge_vals = [w for sub in zip(
+            wedge_vals = [x for x in chain(*zip_longest(
                 list(wedge_vals)[:len(wedge_vals)//2],
-                list(wedge_vals)[len(wedge_vals)//2:]) for w in sub]
-            if len(wedge_vals) % 2:
-                inter_wedge_vals.append(list(wedge_vals)[-1])
-            wedge_vals = inter_wedge_vals
+                list(wedge_vals)[len(wedge_vals)//2:])) if x is not None]
+
+        print(wedge_vals)
  
         for i, v in enumerate(wedge_vals):
 
