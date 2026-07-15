@@ -207,6 +207,7 @@ class Wheel:
                 list(wedge_vals)[len(wedge_vals)//2:]) for w in sub]
             if len(wedge_vals) % 2:
                 inter_wedge_vals.append(list(wedge_vals)[-1])
+            wedge_vals = inter_wedge_vals
  
         for i, v in enumerate(wedge_vals):
 
