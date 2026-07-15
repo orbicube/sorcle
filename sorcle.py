@@ -145,7 +145,14 @@ class Wheel:
         else: use_key = False
 
         start_row = s_config["start_row"]
-        max_row = s_config["max_rows"]-1 + start_row
+
+        # max_rows may be a file name
+        if isinstance(s_config["max_rows"], str):
+            with open(s_config["max_rows"]) as f:
+                max_row = int(f.read())
+                max_row = max_row - 1 + start_row
+        else:
+            max_row = s_config["max_rows"]-1 + start_row
 
         ranges = [f"{c}{start_row}:{c}{max_row}"
             for c in columns_to_scan]
@@ -186,13 +193,22 @@ class Wheel:
                         "key": key})
 
         # Calculate angle for wedges
-        wedge_num = sum(len(w) for w in wedge_dict.values())
+        wedge_vals = wedge_dict.values()
+        wedge_num = sum(len(w) for w in wedge_vals)
         angle_per_wedge = 360 / wedge_num
 
         curr_angle = 0.0
         color = (0,0,0)
 
-        for i, v in enumerate(wedge_dict.values()):
+        # Option to combine the two halves of the list alternating
+        if s_wheel["interleave"]:
+            inter_wedge_vals = [w for sub in zip(
+                list(wedge_vals)[:len(wedge_vals)//2],
+                list(wedge_vals)[len(wedge_vals)//2:]) for w in sub]
+            if len(wedge_vals) % 2:
+                inter_wedge_vals.append(list(wedge_vals)[-1])
+ 
+        for i, v in enumerate(wedge_vals):
 
             # If we're combining wedges, move everything into first wedge
             if len(v) > 1 and s_wheel["combine_dupes"]:
@@ -216,7 +232,7 @@ class Wheel:
                 valid_colors = self.colors[:]
                 if i > 0:
                     valid_colors.remove(color)
-                    if (curr_angle + wedge_angle == 360
+                    if (int(curr_angle + wedge_angle) == 360
                         and self.wedges[0].color[:-1] != color
                         and len(valid_colors) > 1):
                         valid_colors.remove(self.wedges[0].color[:-1])
@@ -423,7 +439,14 @@ class Sorcle(pyglet.window.Window):
             value_input_option=gspread.utils.ValueInputOption.user_entered)
 
         if s_move["cut_max"]:
-            s_config["max_rows"] -= len(winner.rows)
+            if isinstance(s_config["max_rows"], str):
+                with open(s_config["max_rows"], "a+") as f:
+                    m_rows = f.read()
+                    f.seek(0)
+                    f.write(int(m_rows) - len(winner.rows))
+                    f.truncate()
+            else:
+                s_config["max_rows"] -= len(winner.rows)
 
 
     def on_draw(self):

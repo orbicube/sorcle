@@ -30,11 +30,14 @@ id: String # found between /d/ and /edit in url of a Google Sheets spreadsheet
 sheet: String # Sheet name, Sheet1 if you haven't renamed one
 first_column: String # Leftmost column, in letter notation
 last_column: String # Rightmost column, in letter notation
-row: Integer # Row number to start from, indexing from 1
+start_row: Integer # Row number to start from, indexing from 1
+max_rows: Integer|String # Either a number of rows to include on the wheel or a string pointing to file containing that number
 primary_column: String # Column to scan, in letter noation
+key_column: String # Column to use to avoid unwanted duplicate detection, set to same value as primary_column if not using
 sub_column: String # Optional secondary column to display under winner and written to sub.txt
 extra_columns: Array # Optional extra columns written to files extra1.txt, extra2.txt, etc.
 separator: String # Separator to use when writing multiple entries to files
+
 
 [move]
 enabled: Boolean # If true, will move columns into another sheet when "move" file is detected
@@ -43,6 +46,8 @@ column: String # Leftmost column for data on the sheet we're moving to
 row: Integer # Topmost row for data on the sheet we're moving to
 prepend_date: Boolean # Will add a date in the first column
 date_format: String # How to format the date in strftime format https://strftime.org/ e.g. "%Y-%m-%d"
+cut_max: Boolean # Whether to decrement max_rows upon moving
+
 
 [wheel]
 font: String # Font installed in the system
@@ -53,6 +58,7 @@ suppress_win: Boolean # Suppress winner notification if handling visuals elsewhe
 decel_rate: Array[Float] # Minimum and maximum deceleration rate; bigger number is faster (1.0 = -1% of current speed per tick)
 decel_change: Float # Whether the deceleration rate should change every tick, or be static per-spin
 speed_range: Array[Int] # Minimum and maximum speeds for the wheel to spin
+interleave: Boolean # Whether to interleave the wedges
 
 
 [pointer] # Image that points to the result of the wheel
@@ -61,20 +67,26 @@ scale: Float # 1.0 = 100%
 x_pos: Integer # Position on screen, adjustable for different images
 y_pos: Integer 
 
+
 [center] # Image placed in the center of the wheel
 file: String # Can be animated GIF or any other arbitrary image type
 scale: Float # 1.0 = 100%
 rotate: Boolean # Rotate with the wheel
 
+
 [tick] # Sound played when pointer 'hits' wedge
 file: String # WAV only I think
 volume: Float # 1.0 = 100%
+
 
 [finished] # Sound played when wheel finishes spinning
 file: String # WAV only I think
 volume: Float # 1.0 = 100%
 
+
 [window]
 nearest_neighbour: Boolean # Whether to use nearest neighbour scaling for pixel art sprites
+transparent: Boolean # Whether the window should be transparent
+bg_color: Array[Int] # RGB colours to use as background if transparent is false
 ```
 
