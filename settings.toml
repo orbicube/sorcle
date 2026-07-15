@@ -9,7 +9,7 @@ last_column = "E"
 start_row = 3
 # Number of rows to include after start_row
 # May also be a file name e.g. "max_rows.txt" pointing to a file containing a single number
-max_rows = 10
+max_rows = 999
 # Primary column. Written to winner.txt
 primary_column = "C"
 # Column to use to avoid unwanted duplicate detection
@@ -72,7 +72,7 @@ decel_change = false
 # Minimum and maximum speeds for the wheel to spin
 speed_range = [25, 100]
 # Whether to interleave the wedges
-interleave = true
+interleave = false
 
 [pointer] # Image that points to the result of the wheel
 # Can be animated GIF or any other arbitrary image type
